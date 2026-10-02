@@ -1,0 +1,13 @@
+# Survey microdata: Rwanda MTF 2022 is licensed and must NOT be redistributed.
+# Kenya MTF is CC-BY but large. Only aggregate derived files are committed.
+data/raw/
+*.zip
+# Unpublished manuscript drafts stay local (repo is public).
+manuscript/private/
+# Generated
+__pycache__/
+.pytest_cache/
+*.pyc
+.venv/
+results/**/*.png
+figs/

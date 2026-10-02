@@ -1,0 +1,22 @@
+# Single source for sites and run settings. Model parameters with provenance
+# live in src/final_cfg.py.
+countries:
+  rwanda:
+    site_name: Nkombo Island
+    latitude: -2.397
+    longitude: 28.908
+    representative_year: 2015     # median-GHI year 2005-2024 (load_resource.py)
+  kenya:
+    site_name: Ringiti Island
+    latitude: -0.465
+    longitude: 33.972
+    representative_year: 2007
+shared:
+  resource:
+    variables: [ALLSKY_SFC_SW_DWN, T2M, WS2M]
+    years: [2005, 2024]
+  pv: {noct_c: 45, temp_coeff_per_c: -0.004, derate_factor: 0.85}
+run:
+  n_households: 300
+  connections: 300
+  seed: 42

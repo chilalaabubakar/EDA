@@ -354,6 +354,62 @@ def kenya_ownership(root, grid_loc="Rural with grid access",
     return pd.DataFrame(rows).sort_values("ownership_rate", ascending=False)
 
 
+# Questionnaire item numbers for the core-file multi-select m_m_3_group
+# ("owns any of the following", items M.15-M.40). The M3 asset file's columns
+# follow the same item order, verified by correlating each asset_* flag with
+# every code in m_m_3_group: each column's best match is its own item.
+KENYA_ITEM_CODES = {
+    "incandescent_bulb": 15, "fluorescent_tube": 16, "cfl_bulb": 17,
+    "led_bulb": 18, "torch_lantern": 19, "radio": 20, "vcd_dvd": 21,
+    "fan": 22, "refrigerator": 23, "electric_iron": 25, "computer": 32,
+    "kettle": 33, "smartphone_charger": 34, "mobile_charger": 35,
+    "tv_bw": 36, "tv_colour": 37, "tv_flat": 38,
+}
+
+
+def kenya_ownership_core(root, grid_loc="Rural with grid access",
+                         weight_file="weight.csv"):
+    """Kenya ownership from the CORE file's multi-select m_m_3_group.
+
+    WHY THIS EXISTS. The M3 asset flags (what kenya_ownership() reads, and what
+    s3.2 reports) are not the same measurement as the core multi-select:
+    among Kenyan households whose m_m_3_group lists item 35 (mobile charger),
+    only 271 of 712 have asset_charger == "Yes" in M3; M3 "Yes" is almost a
+    strict subset of the multi-select. For rural grid-connected households the
+    two give, e.g., colour TV 30.3% vs 9.6%, bulb 23.2% vs 8.3%, mobile
+    charger 17.9% vs 3.9%. Which one is "ownership" must be settled against the
+    questionnaire (Section M); until then both are reported and the choice is
+    final_cfg.KENYA_OWNERSHIP_SOURCE.
+
+    Denominator: every household in the stratum (absence from the
+    multi-select = does not own), weighted by pw_final.
+    """
+    root = Path(root)
+    core = pd.read_csv(root / "MTF_HH_Core_Survey_Final_Data_trimmed-2.csv",
+                       low_memory=False, encoding="latin-1",
+                       usecols=["PARENT_KEY", "grid_loc", "m_m_3_group"])
+    core = core.drop_duplicates("PARENT_KEY")
+    sub = core[core.grid_loc == grid_loc]
+    if sub.empty:
+        raise ValueError(f"grid_loc={grid_loc!r} matched no households")
+    w = pd.Series(1.0, index=sub.index)
+    wpath = root / weight_file
+    if wpath.exists():
+        wt = pd.read_csv(wpath, usecols=["PARENT_KEY", "pw_final"]).drop_duplicates(
+            "PARENT_KEY")
+        sub = sub.merge(wt, on="PARENT_KEY", how="left")
+        w = pd.to_numeric(sub.pw_final, errors="coerce").fillna(1.0)
+    codes = sub.m_m_3_group.fillna("").astype(str).str.split()
+    rows = []
+    for name, code in KENYA_ITEM_CODES.items():
+        owned = codes.apply(lambda L, c=str(code): c in L)
+        rows.append({"country": "kenya", "appliance": name,
+                     "ownership_rate": round(float((owned * w).sum() / w.sum()), 4),
+                     "measured_minutes": None, "n_households": int(len(sub)),
+                     "source": "core m_m_3_group"})
+    return pd.DataFrame(rows).sort_values("ownership_rate", ascending=False)
+
+
 # ------------------------------------------------------------------- emitter
 def to_ramp_dict(df, durations="assumed", min_rate=0.005):
     """appliance -> (rate, watts, daily_minutes, window), RAMP's format."""

@@ -1,0 +1,6 @@
+group,n,morning_min,afternoon_min,evening_min,share_morning,share_afternoon,share_evening,share_morning_weighted,share_afternoon_weighted,share_evening_weighted
+Rural with grid access,445,45.5,54.0,69.2,0.2695,0.32,0.4104,0.2579,0.3212,0.4209
+Rural without grid access,1771,49.5,59.5,71.1,0.2746,0.3305,0.3949,0.2727,0.3324,0.395
+Urban with grid access,1295,38.7,42.5,66.9,0.2615,0.2869,0.4515,0.2557,0.2847,0.4596
+Urban without grid access,416,47.4,51.7,67.8,0.2841,0.3098,0.4061,0.2839,0.3018,0.4143
+ALL,3927,45.3,52.5,69.2,0.2712,0.3143,0.4145,0.2678,0.3185,0.4137

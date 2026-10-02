@@ -21,7 +21,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from load_builder import build_cooking_load, cooking_daypart_shares, DAYPART_WINDOWS
+from dataclasses import replace
+
+from load_builder import (CookingParams, DAYPART_WINDOWS, build_cooking_load,
+                          cooking_daypart_shares, diversity_factor)
+
+# MECS measured diversity factors (Scott et al. 2025), average-profile basis.
+MECS_DF = {"kenya": 9.75, "tanzania": 13.52, "ghana": 13.00}
 
 
 def modelled_diurnal(n_households, penetration=1.0, phi=0.0, seed=42):
@@ -31,6 +37,56 @@ def modelled_diurnal(n_households, penetration=1.0, phi=0.0, seed=42):
     per_hh_w = np.array([load_kw[hours == h].mean() for h in range(24)]) * 1000.0
     n_cook = max(int(round(n_households * penetration)), 1)
     return per_hh_w / n_cook
+
+
+def calibrate_timing_sd(target_df=MECS_DF["kenya"], n_households=300,
+                        seeds=range(10), lo=0.5, hi=3.0, tol=0.01,
+                        params=None):
+    """Bisect CookingParams.timing_sd_h so the mean MECS-basis diversity
+    factor over `seeds` equals `target_df`. DF rises monotonically with the
+    spread (wider timing -> lower average-profile peak).
+
+    This is CALIBRATION, not validation: s3.8 must say the spread was tuned to
+    the Kenyan DF. Peak hour, three-peak shape and night minimum are then the
+    validated features, and Tanzania/Ghana remain out-of-sample.
+    Returns (sd, achieved_df).
+    """
+    base = params or CookingParams()
+
+    def df_at(sd):
+        p = replace(base, timing_sd_h=sd)
+        return float(np.mean([diversity_factor(
+            build_cooking_load(n_households, 1.0, 0.0, p, seed=s), n_households,
+            p.epc_power_kw) for s in seeds]))
+
+    while hi - lo > tol:
+        mid = (lo + hi) / 2
+        if df_at(mid) < target_df:
+            lo = mid
+        else:
+            hi = mid
+    sd = round((lo + hi) / 2, 3)
+    return sd, df_at(sd)
+
+
+def validation_summary(n_households=300, seeds=range(10), params=None):
+    """The numbers Table 2 reports, from the model as it now stands."""
+    p = params or CookingParams()
+    rows = []
+    for s in seeds:
+        L = build_cooking_load(n_households, 1.0, 0.0, p, seed=s)
+        prof = L.reshape(-1, 24).mean(axis=0)
+        rows.append({
+            "seed": s,
+            "df_mecs": diversity_factor(L, n_households, p.epc_power_kw),
+            "df_worst_hour": diversity_factor(L, n_households, p.epc_power_kw,
+                                              "worst_hour"),
+            "peak_hour": int(prof.argmax()),
+            "peak_w_per_hh": 1000 * prof.max() / n_households,
+            "daily_kwh_per_hh": L.sum() / 365 / n_households,
+            "night_min_22_05": float(np.r_[prof[22:], prof[:5]].max()),
+        })
+    return pd.DataFrame(rows)
 
 
 def metrics(model_w, target_w):

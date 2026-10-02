@@ -615,3 +615,41 @@ def required_tariff(cfg, sizing, load_builder, resource, target_irr=None,
         else:
             lo = mid
     return hi, irr_at(hi)
+
+
+def required_operating_subsidy(cfg, sizing, load_builder, resource,
+                               tariff_mode="flat", target_irr=None,
+                               grant_fraction=0.0, hi=5000.0, tol=0.01):
+    """Annual operating subsidy per connection ($/connection/yr, constant in
+    real terms, escalating with OPEX) that lifts IRR to the target at the
+    REGULATED tariff - the third inverse solver (Phase 3).
+
+    s6.3 concludes that "the arithmetic points to operating subsidy" without
+    pricing it. This prices it. Optionally combined with a capital grant, to
+    show how far a grant reduces the recurring commitment.
+    Returns (usd_per_connection_year, irr) or (None, irr_at_hi).
+    """
+    target = target_irr if target_irr is not None else cfg["finance"]["target_irr"]
+    esc = cfg["opex"]["escalation_rate"]
+    conn = sizing["connections"]
+    c = _copy_cfg(cfg)
+    c["capex"] = {**cfg["capex"], "_grant_fraction": grant_fraction}
+
+    def irr_at(s):
+        sub = lambda y: s * conn * (1 + esc) ** (y - 1)
+        _, m = simulate(c, sizing, load_builder, resource, tariff_mode,
+                        operating_subsidy=sub)
+        return m["irr"]
+
+    top = irr_at(hi)
+    if not (top == top) or top < target:
+        return None, top
+    lo = 0.0
+    while hi - lo > tol:
+        mid = (lo + hi) / 2
+        r = irr_at(mid)
+        if (r == r) and r >= target:
+            hi = mid
+        else:
+            lo = mid
+    return hi, irr_at(hi)

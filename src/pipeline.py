@@ -260,6 +260,78 @@ def s_esmap(ctx):
                               float_format="%.10g")
 
 
+# --------------------------------------------------------------------- phase 3
+@step("operating_subsidy", "phase3")
+def s_opsub(ctx):
+    import operating_subsidy
+    rows = []
+    for site in ctx.sites:
+        cfg, b, res, sizing = _headline(ctx, site)
+        rows.append({"site": site, **operating_subsidy.cost(cfg, sizing, b, res, ctx.n)})
+    pd.DataFrame(rows).to_csv(ctx.csv("operating_subsidy.csv"), index=False,
+                              float_format="%.10g")
+
+
+@step("peaks", "phase3")
+def s_peaks(ctx):
+    """Curtailment and the peak effect of shifting, from the sweep outputs."""
+    F = ctx.read("frontier_both.csv")
+    F = F[F.discount == F.discount.max()]
+    cols = ["site", "penetration", "phi", "discount", "battery_flat", "battery_kwh",
+            "avoided_battery_kwh", "peak_cooking_kw_flat", "peak_cooking_kw_year1",
+            "peak_load_kw_year1", "peak_load_kw_final_year", "curtailed_fraction"]
+    out = F[cols].rename(columns={"peak_cooking_kw_year1": "peak_cooking_kw_tou",
+                                  "curtailed_fraction": "curtailed_fraction_tou"})
+    S = ctx.read("scenarios_both.csv")
+    flat = S[S.tariff == "flat"].groupby(["site", "penetration"]).agg(
+        curtailed_fraction_flat=("curtailed_fraction", "first"),
+        peak_load_kw_year1_flat=("peak_load_kw_year1", "first")).reset_index()
+    out = out.merge(flat, on=["site", "penetration"], how="left")
+    out["cooking_peak_change_pct"] = 100 * (out.peak_cooking_kw_tou
+                                            / out.peak_cooking_kw_flat - 1)
+    out["system_peak_change_pct"] = 100 * (out.peak_load_kw_year1
+                                           / out.peak_load_kw_year1_flat - 1)
+    out.to_csv(ctx.csv("peak_and_curtailment.csv"), index=False, float_format="%.10g")
+    S.groupby(["site", "penetration", "tariff", "discount", "phi"]).curtailed_fraction.first() \
+        .reset_index().to_csv(ctx.csv("curtailment.csv"), index=False, float_format="%.10g")
+
+
+@step("household_bands", "phase3")
+def s_household_bands(ctx):
+    import household_bands as H
+    rows, pen = [], []
+    for site in ctx.sites:
+        cfg = ctx.cfg(site)
+        for p in (0.0, 1.0):
+            rows.append(H.check(cfg, ctx.n, p, 0.0, ctx.seed).assign(site=site))
+        for y in (1, 20):
+            pen.append({"site": site, **H.adoption_penalty_distribution(cfg, ctx.n, ctx.seed, y)})
+    pd.concat(rows).to_csv(ctx.csv("household_bands.csv"), index=False, float_format="%.10g")
+    pd.DataFrame(pen).to_csv(ctx.csv("adoption_penalty_households.csv"), index=False,
+                             float_format="%.10g")
+
+
+@step("ringiti", "phase3")
+def s_ringiti(ctx):
+    import ringiti
+    cfg = ctx.cfg("kenya")
+    ringiti.run(cfg, ctx.resource("kenya"), ctx.seed, sizing_kw=_skw(ctx, cfg)).to_csv(
+        ctx.csv("ringiti_benchmark.csv"), index=False, float_format="%.10g")
+
+
+@step("household_cost", "phase3")
+def s_household_cost(ctx):
+    import household_cost
+    B = ctx.read("tariff_band_recomputed.csv")
+    rows = []
+    for site in ctx.sites:
+        r = B[(B.site == site) & (B.year == 1)].iloc[0]
+        df = household_cost.compare(ctx.cfg(site), r.kwh_no_ecooking,
+                                    r.kwh_full_ecooking - r.kwh_no_ecooking)
+        rows.append(df.assign(site=site))
+    pd.concat(rows).to_csv(ctx.csv("household_cost.csv"), index=False, float_format="%.10g")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)

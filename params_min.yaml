@@ -1,0 +1,6 @@
+countries:
+  rwanda: {site_name: Nkombo Island, latitude: -2.397, longitude: 28.908}
+  kenya:  {site_name: Ringiti Island, latitude: -0.465, longitude: 33.972}
+shared:
+  resource: {variables: [ALLSKY_SFC_SW_DWN, T2M, WS2M]}
+  pv: {noct_c: 45, temp_coeff_per_c: -0.004, derate_factor: 0.85}

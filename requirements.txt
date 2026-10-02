@@ -1,0 +1,11 @@
+# Pinned: rampdemand 0.5.0 needs numpy<2 and pandas<2.2.
+numpy==1.26.4
+pandas==2.1.4
+rampdemand==0.5.0
+numpy-financial==1.0.0
+PyYAML==6.0.3
+scipy==1.17.1
+matplotlib==3.11.2
+numba==0.68.0
+pytest==9.1.1
+python-docx==1.2.0

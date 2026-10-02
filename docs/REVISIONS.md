@@ -1,5 +1,48 @@
 # Revision plan: status, findings, and manuscript changes
 
+## Real results — first full run (NASA POWER 2005–2024, 2 Oct 2026)
+
+`python src/pipeline.py all`, headline Kenya ownership source = M3 (as
+published). All tables: `results/tables/tables.md`. Against the current
+draft, `manuscript_check.py` reports **64 mismatches**
+(`results/manuscript_mismatches_current_draft.txt`) — that list is the edit
+list for the manuscript.
+
+| Claim | Draft | Now | Note |
+|---|---|---|---|
+| Resource: median GHI, spread | 1,744 / 2,076; 7.4% / 8.0% | **same** | reproduced exactly |
+| LCOE 0 → 100% eCooking, Rwanda | $2.99 → $1.25 (−58%) | **$2.64 → $1.05 (−60%)** | 24-seed CI 59.9–60.0% |
+| LCOE 0 → 100% eCooking, Kenya | $2.90 → $1.16 (−60%) | **$6.08 → $1.04 (−83%)** | 🔶 driven by M3 ownership: 2 kWh/month without cooking |
+| Storage at 100%, Rwanda / Kenya | 640 / 600 kWh | **780 / 660 kWh** | worst-year constraint now enforced |
+| Avoided storage, φ = 0.5 (24 seeds) | 28% / 27% | **21% (20–22) / 33% (32–34)** | single seed 42 gives 18% / 27% — quote the ensemble |
+| ToU LCOE reduction (24 seeds) | 8–9% | **5.0% (4.8–5.2) / 6.8% (6.6–6.9)** | |
+| Cooking peak with shifting, φ = 0.5 | — | **+32% (29–35)** | new: §2.1 transformer point |
+| Cost-reflective multiple at 12% | 10.9× / 11.6× | **9.4× / 10.6×** | per-customer OPEX |
+| … at 20% | 15.2× / 16.2× | **13.7× / 15.3×** | |
+| Band penalty, Rwanda | 2.8× (15 → 60 kWh) | **2.1× yr 1 → 3.3× yr 20** | household p10–p90 yr 1: 1.9–2.3× |
+| Band penalty, Kenya | 1.3× | **1.3× throughout** | |
+| Operating subsidy, no grant | — | **$485 / $430 per connection·yr** | $145k / $129k per village·yr; with 95% grant $64 / $73 |
+| $ per tCO₂ vs collected wood | — | **$780–6,200 / t** (fNRB 0.8–0.1) | vs ~$3–15 credits (indicative) |
+| Staged expansion multiple | — | **7.2× / 8.3×** (vs 9.4× / 10.6×) | every year ≤ 5% unmet |
+| Search vs full grid | — | **identical optimum** both cases | worst year 4.9%, lifetime 0.8% |
+| Interannual (median-year design) | single year | LCOE p5–p95 within ±0.2%; **9 / 5 of 20 weather years breach 5%** (max 6.5%) | P10 sizing: same LCOE |
+| Curtailment, 100% eCooking | not reported | **48% / 51%** of PV output | the case for a daytime discount |
+| ToU break-even discount | "90 kWh per ¢" | **operator still gains at 12.5 ¢** (≈ free daytime power) | avoided storage is a step in d |
+| ESMAP waterfall shares | — | discount rate 25%, growth reserve 31% / 23%, demand/connection 44% / 52% | load factor 30% (> ESMAP 22%) |
+
+Reading the run:
+
+* The core story holds and is now defensible: large utilisation gain,
+  modest ToU gain, an order-of-magnitude viability gap that a capital grant
+  cannot close, a regime-specific household penalty that grows over time.
+* **Kenya's numbers hinge on the open ownership decision.** With M3 flags a
+  Kenyan grid household uses ~2 kWh/month before cooking, so the zero-cooking
+  LCOE is $6.08 and the reduction 83%. Run with `KENYA_OWNERSHIP_SOURCE =
+  "core"` before finalising any cross-country comparison.
+* Single-seed results can mislead (Rwanda φ = 0.3 and 0.5 tie at seed 42 on
+  the 20 kWh grid); quote ensemble means with CIs in text.
+
+
 Every item from the four-phase revision plan, what the code now does, what it
 found, and the text the manuscript needs. Numbers marked **[run]** must come
 from `python src/pipeline.py all` on real NASA POWER data — the development

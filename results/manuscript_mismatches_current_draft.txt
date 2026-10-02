@@ -1,0 +1,66 @@
+MISMATCH Table 2 row 1 col 2: manuscript '9.60' != results '9.74'
+MISMATCH Table 2 row 3 col 2: manuscript '104 W (1 kW EPC)' != results '103 W (1 kW EPC)'
+MISMATCH Table 3 row 1 col 2: manuscript '40 kW / 100 kWh' != results '65 kW / 180 kWh'
+MISMATCH Table 3 row 1 col 3: manuscript '$2.99' != results '$2.64'
+MISMATCH Table 3 row 1 col 4: manuscript '35 kW / 100 kWh' != results '20 kW / 80 kWh'
+MISMATCH Table 3 row 1 col 5: manuscript '$2.90' != results '$6.08'
+MISMATCH Table 3 row 2 col 2: manuscript '170 kW / 380 kWh' != results '200 kW / 480 kWh'
+MISMATCH Table 3 row 2 col 3: manuscript '$1.44' != results '$1.29'
+MISMATCH Table 3 row 2 col 4: manuscript '155 kW / 360 kWh' != results '140 kW / 380 kWh'
+MISMATCH Table 3 row 2 col 5: manuscript '$1.36' != results '$1.35'
+MISMATCH Table 3 row 3 col 2: manuscript '305 kW / 640 kWh' != results '340 kW / 780 kWh'
+MISMATCH Table 3 row 3 col 3: manuscript '$1.25' != results '$1.05'
+MISMATCH Table 3 row 3 col 4: manuscript '275 kW / 600 kWh' != results '270 kW / 660 kWh'
+MISMATCH Table 3 row 3 col 5: manuscript '$1.16' != results '$1.04'
+MISMATCH Table 4 row 1 col 2: manuscript '640 kWh' != results '780 kWh'
+MISMATCH Table 4 row 1 col 4: manuscript '$1.248' != results '$1.052'
+MISMATCH Table 4 row 1 col 5: manuscript '600 kWh' != results '660 kWh'
+MISMATCH Table 4 row 1 col 7: manuscript '$1.161' != results '$1.037'
+MISMATCH Table 4 row 2 col 2: manuscript '540 kWh' != results '640 kWh'
+MISMATCH Table 4 row 2 col 3: manuscript '100 kWh (16%)' != results '140 kWh (18%)'
+MISMATCH Table 4 row 2 col 4: manuscript '$1.185' != results '$1.003'
+MISMATCH Table 4 row 2 col 5: manuscript '500 kWh' != results '540 kWh'
+MISMATCH Table 4 row 2 col 6: manuscript '100 kWh (17%)' != results '120 kWh (18%)'
+MISMATCH Table 4 row 2 col 7: manuscript '$1.097' != results '$0.980'
+MISMATCH Table 4 row 3 col 2: manuscript '460 kWh' != results '640 kWh'
+MISMATCH Table 4 row 3 col 3: manuscript '180 kWh (28%)' != results '140 kWh (18%)'
+MISMATCH Table 4 row 3 col 4: manuscript '$1.144' != results '$0.995'
+MISMATCH Table 4 row 3 col 5: manuscript '440 kWh' != results '480 kWh'
+MISMATCH Table 4 row 3 col 6: manuscript '160 kWh (27%)' != results '180 kWh (27%)'
+MISMATCH Table 4 row 3 col 7: manuscript '$1.056' != results '$0.964'
+MISMATCH Table 5: shape differs - manuscript 5x3, generated 5x7. Paste results/tables/table5.csv.
+MISMATCH Table 6 row 1 col 2: manuscript '$1.321' != results '$1.103'
+MISMATCH Table 6 row 1 col 3: manuscript '9.0×' != results '7.5×'
+MISMATCH Table 6 row 1 col 4: manuscript '$1.230' != results '$1.090'
+MISMATCH Table 6 row 1 col 5: manuscript '9.6×' != results '8.5×'
+MISMATCH Table 6 row 2 col 2: manuscript '$1.596' != results '$1.378'
+MISMATCH Table 6 row 2 col 3: manuscript '10.9×' != results '9.4×'
+MISMATCH Table 6 row 2 col 4: manuscript '$1.484' != results '$1.353'
+MISMATCH Table 6 row 2 col 5: manuscript '11.6×' != results '10.6×'
+MISMATCH Table 6 row 3 col 2: manuscript '$1.821' != results '$1.603'
+MISMATCH Table 6 row 3 col 3: manuscript '12.4×' != results '10.9×'
+MISMATCH Table 6 row 3 col 4: manuscript '$1.692' != results '$1.568'
+MISMATCH Table 6 row 3 col 5: manuscript '13.3×' != results '12.3×'
+MISMATCH Table 6 row 4 col 2: manuscript '$2.224' != results '$2.007'
+MISMATCH Table 6 row 4 col 3: manuscript '15.2×' != results '13.7×'
+MISMATCH Table 6 row 4 col 4: manuscript '$2.065' != results '$1.953'
+MISMATCH Table 6 row 4 col 5: manuscript '16.2×' != results '15.3×'
+MISMATCH claim abstract_lcoe_reduction: manuscript says '58', results give '60' (lcoe_reduction_pct_rwanda)
+MISMATCH claim abstract_lcoe_reduction: manuscript says '60', results give '83' (lcoe_reduction_pct_kenya)
+MISMATCH claim abstract_avoided_storage: manuscript says '28', results give '18' (avoided_storage_pct_rwanda)
+MISMATCH claim abstract_tou_lcoe: manuscript says '8', results give '5' (tou_lcoe_reduction_pct_min)
+MISMATCH claim abstract_tou_lcoe: manuscript says '9', results give '7' (tou_lcoe_reduction_pct_max)
+MISMATCH claim abstract_multiple: manuscript says '10.9', results give '9.4' (multiple_base_rwanda)
+MISMATCH claim abstract_multiple: manuscript says '11.6', results give '10.6' (multiple_base_kenya)
+MISMATCH claim abstract_multiple_20pct: manuscript says '15', results give '14' (multiple_max_rate_min)
+MISMATCH claim abstract_multiple_20pct: manuscript says '16', results give '15' (multiple_max_rate_max)
+MISMATCH claim abstract_band_penalty: manuscript says '2.8', results give '2.1' (band_factor_year1_rwanda)
+MISMATCH claim abstract_band_penalty: manuscript says '0.169', results give '0.130' (blended_post_year1_rwanda)
+MISMATCH claim s51_lcoe_levels: manuscript says '2.99', results give '2.64' (lcoe_zero_rwanda)
+MISMATCH claim s51_lcoe_levels: manuscript says '1.25', results give '1.05' (lcoe_full_rwanda)
+MISMATCH claim s51_lcoe_levels: manuscript says '58', results give '60' (lcoe_reduction_pct_rwanda)
+MISMATCH claim s51_lcoe_levels: manuscript says '2.90', results give '6.08' (lcoe_zero_kenya)
+MISMATCH claim s51_lcoe_levels: manuscript says '1.16', results give '1.04' (lcoe_full_kenya)
+MISMATCH claim s51_lcoe_levels: manuscript says '60', results give '83' (lcoe_reduction_pct_kenya)
+
+64 mismatches

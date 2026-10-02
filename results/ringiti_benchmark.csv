@@ -1,0 +1,5 @@
+basis,connections,pv_kw,battery_kwh,inverter_kw,w_per_connection,kwh_storage_per_kwp,lcoe,kwh_per_connection_year1,regulated_tariff_model,tariff_installed
+"model, eCooking 0%",300,20,80,15,66.66666667,4,6.076882197,25.92334237,0.1275193798,
+"model, eCooking 50%",300,140,380,85,466.6666667,2.714285714,1.351489108,208.4474535,0.1275193798,
+"model, eCooking 100%",300,270,660,145,900,2.444444444,1.037396606,391.1322313,0.1275193798,
+installed: SOURCE NEEDED - fill RINGITI_ACTUAL,,,,,,,,,0.1275193798,

@@ -9,7 +9,7 @@ __pycache__/
 .pytest_cache/
 *.pyc
 .venv/
-results/**/*.png
+results/synthetic/**/*.png
 figs/
 results/synthetic/
 # Hourly NASA POWER series: 8 MB each, regenerated in ~80 s by `pipeline.py resource`

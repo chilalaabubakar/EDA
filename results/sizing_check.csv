@@ -1,0 +1,3 @@
+scenario,search_pv_kw,search_battery_kwh,search_lcoe,search_evaluations,grid_pv_kw,grid_battery_kwh,grid_lcoe,grid_evaluations,lcoe_gap_pct,worst_year_unmet,lifetime_unmet
+rwanda pen=1.0 phi=0.0 flat,340,780,1.051509466,65,340,780,1.051509466,5467,0,0.04892219239,0.007764535318
+kenya pen=0.5 phi=0.5 tou,145,260,1.284228142,59,145,260,1.284228142,5467,0,0.04551504127,0.01007687722

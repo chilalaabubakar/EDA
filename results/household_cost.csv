@@ -1,0 +1,9 @@
+option,cash_usd_year,of_which_electricity,of_which_appliance,incremental_rate_usd_kwh,site
+electric (EPC),104.7961859,52.73764235,52.05854355,0.1444040492,rwanda
+"firewood, collected (cash)",0,,,,rwanda
+"firewood, collected (time at shadow wage)",46.8,,,,rwanda
+"firewood, purchased: SOURCE NEEDED",,,,,rwanda
+electric (EPC),99.4777895,47.41924595,52.05854355,0.1298414343,kenya
+"firewood, collected (cash)",0,,,,kenya
+"firewood, collected (time at shadow wage)",46.8,,,,kenya
+"firewood, purchased: SOURCE NEEDED",,,,,kenya

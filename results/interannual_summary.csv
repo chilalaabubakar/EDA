@@ -1,0 +1,3 @@
+site,rep_year,ghi_spread_pct,lcoe_rep_year,lcoe_p05,lcoe_median,lcoe_p95,worst_year_unmet_max_over_weather,weather_years_breaching,chrono_lcoe,chrono_worst_year_unmet,chrono_years_breaching,p10_year,p10_pv_kw,p10_battery_kwh,p10_lcoe,multiple_rep_year,multiple_p10_sizing
+rwanda,2015,7.420236837,1.051509466,1.051422581,1.051973573,1.053224453,0.06541370367,9,1.052325093,0.04936954074,0,2012,340,780,1.051809894,9.400572618,9.403062738
+kenya,2007,8.023423877,1.037396606,1.035737653,1.036997044,1.038579894,0.0623819335,5,1.037649837,0.05729062371,1,2018,280,660,1.050869253,10.60857631,10.75383466

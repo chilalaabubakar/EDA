@@ -1,0 +1,5 @@
+phi_nominal,break_even_discount,note,avoided_battery_kwh,site,step_function
+0.3,,operator still gains at 0.125 $/kWh; widen the sweep,140,rwanda,True
+0.5,,operator still gains at 0.125 $/kWh; widen the sweep,140,rwanda,True
+0.3,,operator still gains at 0.125 $/kWh; widen the sweep,120,kenya,True
+0.5,,operator still gains at 0.125 $/kWh; widen the sweep,180,kenya,True

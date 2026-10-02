@@ -1,0 +1,5 @@
+Band,Rwanda (RWF/kWh),Kenya (KES/kWh)
+Lifeline,89 (0–20 kWh),12.23 (<30 kWh)
+Middle,310 (20–50 kWh),16.45 (31–100 kWh)
+Upper,369 (>50 kWh),19.08 (>100 kWh)
+Structure,Telescopic,Non-telescopic

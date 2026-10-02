@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "eCooking mini-grid model: electric cooking, tariff structure and the mini-grid viability gap in Rwanda and Kenya"
+type: software
+# TO FILL before the Zenodo release: author names, ORCID, affiliation.
+authors:
+  - family-names: "TO FILL"
+    given-names: "TO FILL"
+    affiliation: "TO FILL"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+repository-code: "https://github.com/chilalaabubakar/EDA"
+license: MIT
+version: "0.5.0"
+# doi: 10.5281/zenodo.XXXXXXX   <- filled after the first Zenodo release
+keywords: [mini-grids, electric cooking, time-of-use tariffs, energy access, Rwanda, Kenya]
+references:
+  - type: software
+    title: "RAMP: an open-source bottom-up stochastic model for generating multi-energy load profiles"
+    authors: [{family-names: Lombardi, given-names: Francesco}]
+    doi: 10.1016/j.energy.2019.04.097
+  - type: data
+    title: "Rwanda Multi-Tier Framework Energy Survey 2022 (RWA_2022_MTF_v01_M)"
+    authors: [{name: "World Bank and ESMAP"}]
+    doi: 10.48529/x75v-fm71
+  - type: data
+    title: "Kenya Multi-Tier Energy Access Tracking Framework Survey 2016-2018 (KEN_2016-2018_MTF_v02_M)"
+    authors: [{name: "World Bank and ESMAP"}]
+    doi: 10.48529/230v-e158

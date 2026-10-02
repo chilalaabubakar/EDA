@@ -7,9 +7,11 @@ The point is that no number reaches the paper by hand. tests/
 test_manuscript_numbers.py compares these against the .docx cell by cell,
 and against the claims listed in manuscript/claims.yaml.
 
-Docx table order (s3.6 .. s5.4):
+Generated tables (a draft may use a subset, in its own order: see
+`tables:` in claims.yaml):
     1 tariff schedules   2 cooking validation   3 LCOE by penetration
     4 storage displacement   5 blended tariff   6 cost-reflective tariff
+    7 operating subsidy (needs results/operating_subsidy.csv)
 """
 import argparse
 from pathlib import Path
@@ -134,6 +136,23 @@ def table6(D):
                                        "Multiple "])
 
 
+def table7(O, grants=((0, "None"), (50, "50%"), (95, "95%"))):
+    """Operating subsidy for the target return at the regulated tariff, by
+    capital grant: US$ per connection per year and per village in year 1."""
+    O = O.set_index("site")
+    rows = []
+    for g, label in grants:
+        row = [label]
+        for site in SITES:
+            r = O.loc[site]
+            row += [f"{r[f'opsub_grant{g}_usd_per_conn_year']:,.0f}",
+                    f"{round(r[f'opsub_grant{g}_usd_per_village_year1'], -3):,.0f}"]
+        rows.append(row)
+    return pd.DataFrame(rows, columns=["Capital grant", "Rwanda, US$/connection/yr",
+                                       "Rwanda, US$/village/yr", "Kenya, US$/connection/yr",
+                                       "Kenya, US$/village/yr"])
+
+
 # ------------------------------------------------------------- in-text numbers
 def headline_numbers(S, F, B, D, base_rate=0.12, discount=None):
     """Named quantities quoted in the abstract, s1 and s5-s7."""
@@ -200,6 +219,8 @@ def build_all(results="results", validation=None):
         validation = pd.read_csv(R / "cooking_validation_summary.csv")
     tables = {1: table1(), 2: table2(validation), 3: table3(S), 4: table4(F),
               5: table5(B), 6: table6(D)}
+    if (R / "operating_subsidy.csv").exists():
+        tables[7] = table7(pd.read_csv(R / "operating_subsidy.csv"))
     return tables, {**headline_numbers(S, F, B, D), **phase_numbers(R)}
 
 

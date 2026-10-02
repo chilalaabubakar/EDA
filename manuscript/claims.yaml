@@ -5,6 +5,12 @@
 #           entry in `values`
 # values  : [key, format] pairs; key from manuscript_tables.headline_numbers()
 #
+# tables  : optional; generated table numbers in manuscript order (default
+#           1..6). A draft that drops or adds tables lists them here.
+#
+# A draft whose text differs can carry its own manuscript/private/claims.yaml
+# (gitignored), which manuscript_check.py uses in preference to this file.
+#
 # When the text is rewritten, update the pattern here in the same commit.
 # A pattern that no longer matches FAILS the test rather than skipping,
 # so a claim cannot silently drop out of checking.

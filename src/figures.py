@@ -205,6 +205,77 @@ def fig6_viability(D, out):
     save(fig, out, "fig6_viability")
 
 
+# ------------------------------------------------- journal figures (Phase 4b)
+def fig_tou_operator(T, out, phi=0.5):
+    """(a) avoided storage and (b) operator NPV gain against the daytime
+    discount, full penetration, one phi. Shows the step response: storage
+    avoided is flat in the discount, the revenue given up is not."""
+    T = T[(T.response == "step") & (T.phi_nominal == phi)]
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7))
+    for i, site in enumerate(SITE):
+        g = T[T.site == site].sort_values("discount")
+        x = 100 * g.discount
+        axes[0].plot(x, g.avoided_battery_kwh, drawstyle="steps-post",
+                     color=SERIES[i], linestyle=STYLES[i])
+        axes[0].plot(x, g.avoided_battery_kwh, linestyle="none", marker=MARKERS[i],
+                     color=SERIES[i], markersize=4, mec="white", mew=0.6)
+        pos = g[g.discount > 0]
+        axes[1].plot(100 * pos.discount, pos.operator_npv_gain / 1000, **style(i),
+                     markersize=4, mec="white", mew=0.6)
+        name = SITE[site].split()[0]
+        label_end(axes[0], x.iloc[-1], g.avoided_battery_kwh.iloc[-1], name, i,
+                  dy=6 if i else -6)
+        label_end(axes[1], 100 * pos.discount.iloc[-1],
+                  pos.operator_npv_gain.iloc[-1] / 1000, name, i)
+    axes[0].set_title("(a) storage avoided", loc="left")
+    axes[0].set_ylabel("kWh")
+    axes[0].set_ylim(0, T.avoided_battery_kwh.max() * 1.25)
+    axes[1].set_title("(b) change in operator NPV", loc="left")
+    axes[1].set_ylabel("US$ thousand")
+    axes[1].axhline(0, color=INK2, lw=0.8)
+    axes[1].set_ylim(bottom=-5)
+    for ax in axes:
+        ax.set_xlabel("daytime discount, US cents/kWh")
+        ax.set_xlim(-0.3, 100 * T.discount.max() + 3.2)
+    fig.tight_layout()
+    save(fig, out, "fig_tou_operator")
+
+
+def fig_esmap(W, out):
+    """Cumulative LCOE bridge from the headline to benchmark-like conventions."""
+    steps = ["Headline", "Discount\nrate 10%", "No growth\nreserve",
+             "Demand\nx2", "Bench-\nmark"]
+    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.9), sharey=True)
+    for ax, site in zip(axes, SITE):
+        v = W[W.site == site].lcoe.values
+        x = np.arange(len(v) + 1)
+        ax.bar(0, v[0], color="#b8b6ae", width=0.62)
+        for i in range(1, len(v)):
+            ax.bar(i, v[i] - v[i - 1], bottom=v[i - 1], color="#1baf7a", alpha=0.75,
+                   width=0.62)
+            ax.annotate(f"\u2212{v[i - 1] - v[i]:.2f}", (i, v[i - 1]), xytext=(0, 3),
+                        textcoords="offset points", ha="center", fontsize=7.5)
+            ax.plot([i - 1.31, i - 0.31], [v[i - 1], v[i - 1]], color=INK2, lw=0.6,
+                    ls=":")
+        ax.bar(len(v), v[-1], color="#b8b6ae", width=0.62)
+        ax.plot([len(v) - 1.31, len(v) - 0.31], [v[-1], v[-1]], color=INK2, lw=0.6, ls=":")
+        for i, val in ((0, v[0]), (len(v), v[-1])):
+            ax.annotate(f"${val:.2f}", (i, val), xytext=(0, 3), textcoords="offset points",
+                        ha="center", fontsize=7.5, fontweight="bold")
+        ax.axhline(0.55, color=INK2, lw=0.8, ls=(0, (4, 3)))
+        ax.annotate("ESMAP reference $0.55", (2.0, 0.55), xytext=(0, -11),
+                    textcoords="offset points", ha="center", fontsize=7, color=INK2)
+        ax.set_axisbelow(True)
+        ax.set_xticks(x)
+        ax.set_xticklabels(steps, fontsize=7)
+        ax.set_title(SITE[site], loc="left")
+        ax.grid(axis="x", visible=False)
+    axes[0].set_ylabel("LCOE, US$/kWh")
+    axes[0].set_ylim(0, 1.25)
+    fig.tight_layout()
+    save(fig, out, "fig_esmap")
+
+
 def build(results, out=None):
     R = Path(results)
     out = Path(out or R / "figures")
@@ -215,6 +286,10 @@ def build(results, out=None):
         fig4_substitution(pd.read_csv(R / "tou_sweep.csv"), out)
     fig5_bands(pd.read_csv(R / "tariff_band_recomputed.csv"), out)
     fig6_viability(pd.read_csv(R / "discount_sweep.csv"), out)
+    if (R / "tou_sweep.csv").exists():
+        fig_tou_operator(pd.read_csv(R / "tou_sweep.csv"), out)
+    if (R / "esmap_waterfall.csv").exists():
+        fig_esmap(pd.read_csv(R / "esmap_waterfall.csv"), out)
     return out
 
 

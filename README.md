@@ -29,6 +29,7 @@ python src/pipeline.py resource            # NASA POWER 2005-2024, local solar t
 python src/pipeline.py all                 # every result, table and figure -> results/
 python src/manuscript_tables.py --abstract # abstract rendered from results
 python src/manuscript_check.py manuscript/private/<draft>.docx   # 0 mismatches before submission
+                                           # uses manuscript/private/claims.yaml if present
 ```
 
 Or run `notebooks/eCooking_AEF_Colab_v5.ipynb` in Colab.
@@ -44,7 +45,7 @@ Or run `notebooks/eCooking_AEF_Colab_v5.ipynb` in Colab.
 | 1 | `bands` | `tariff_band_recomputed.csv` (Table 5, by project year) |
 | 1 | `validation` | `cooking_validation_summary.csv` (Table 2) |
 | 1 | `viability` | `viability.csv`, `discount_sweep.csv` (Table 6) |
-| 1 | `tables` | `tables/table{1..6}.csv`, `tables.md`, `headline_numbers.csv` |
+| 1 | `tables` | `tables/table{1..7}.csv`, `tables.md`, `headline_numbers.csv` |
 | 2 | `expansion` | design-year 5/10/20 and staged expansion |
 | 2 | `sizing_check` | search vs exhaustive grid |
 | 2 | `interannual` | 20 weather years, chronological, P10 sizing |
@@ -56,7 +57,7 @@ Or run `notebooks/eCooking_AEF_Colab_v5.ipynb` in Colab.
 | 3 | `household_bands` | household vs mean-household billing |
 | 3 | `ringiti` | benchmark against the installed plant |
 | 3 | `household_cost` | EPC + bill vs firewood |
-| 4 | `figures` | `figures/fig{1..6}*.{png,pdf}` |
+| 4 | `figures` | `figures/fig{1..6}*.{png,pdf}`, `fig_esmap`, `fig_tou_operator` |
 
 `--synthetic` writes to `results/synthetic/` and must never be quoted.
 

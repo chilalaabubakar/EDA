@@ -17,6 +17,8 @@ from manuscript_check import check, compare_claims, compare_tables, docx_content
 from manuscript_tables import build_all
 
 ROOT = Path(__file__).resolve().parents[1]
+# the comparator tests use the committed claims, not a private draft's
+PUBLIC_CLAIMS = ROOT / "manuscript" / "claims.yaml"
 
 
 def _manuscript():
@@ -76,7 +78,7 @@ def test_consistent_manuscript_passes(synthetic_results, tmp_path):
     _write_docx(p, tables, _text(numbers))
     text, doc_tables = docx_content(p)
     assert compare_tables(doc_tables, tables) == []
-    probs = compare_claims(text, numbers)
+    probs = compare_claims(text, numbers, PUBLIC_CLAIMS)
     # only the claims whose text this stub manuscript lacks may be reported
     assert all("pattern not found" in x for x in probs)
     assert not any("abstract_lcoe_reduction" in x for x in probs)
@@ -91,7 +93,7 @@ def test_one_wrong_number_is_caught(synthetic_results, tmp_path):
     text, doc_tables = docx_content(p)
     tprobs = compare_tables(doc_tables, tables)
     assert len(tprobs) == 1 and "Table 3 row 2 col 3" in tprobs[0]
-    cprobs = compare_claims(text, numbers)
+    cprobs = compare_claims(text, numbers, PUBLIC_CLAIMS)
     assert any("abstract_lcoe_reduction" in x and "'1'" in x for x in cprobs)
 
 
@@ -102,3 +104,21 @@ def test_current_draft_is_out_of_date(synthetic_results):
     if ms is None:
         pytest.skip("no manuscript")
     assert check(ms, synthetic_results)
+
+
+def test_table_order_and_negated_claims(synthetic_results, tmp_path):
+    """A draft may drop a table (order lists what it keeps) and quote the
+    magnitude of a negative result ("-key")."""
+    tables, numbers = build_all(synthetic_results)
+    kept = [1, 2, 3, 5, 6]
+    p = tmp_path / "subset.docx"
+    _write_docx(p, {n: tables[n] for n in kept}, "")
+    _, doc_tables = docx_content(p)
+    assert compare_tables(doc_tables, tables, kept) == []
+    assert compare_tables(doc_tables, tables)  # default order no longer fits
+
+    claims = tmp_path / "claims.yaml"
+    claims.write_text("claims:\n  - id: neg\n    pattern: 'falls by ([\\d.]+)%'\n"
+                      "    values: [[-x, '{:.1f}']]\n")
+    assert compare_claims("cost falls by 5.0%", {"x": -4.98}, claims) == []
+    assert compare_claims("cost falls by 5.0%", {"x": -6.2}, claims)

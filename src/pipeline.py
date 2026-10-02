@@ -143,6 +143,123 @@ def s_tables(ctx):
     print(f"  tables -> {ctx.results / 'tables'}")
 
 
+# --------------------------------------------------------------------- phase 2
+def _headline(ctx, site, penetration=None):
+    """(cfg, builder, resource, sizing) for the headline scenario."""
+    from run_scenarios import make_load_builder
+    from viability import headline_sizing
+    cfg = ctx.cfg(site)
+    sizing, pen = headline_sizing(ctx.read("scenarios_both.csv"), site, ctx.n,
+                                  ctx.conn, penetration)
+    return cfg, make_load_builder(cfg, ctx.n, pen, 0.0, ctx.seed), ctx.resource(site), sizing
+
+
+def _skw(ctx, cfg):
+    return {"pv_range": tuple(cfg["sizing"]["pv_range"]),
+            "batt_range": tuple(cfg["sizing"]["battery_range"])}
+
+
+@step("expansion", "phase2")
+def s_expansion(ctx):
+    import expansion
+    out = []
+    for site in ctx.sites:
+        cfg, b, res, _ = _headline(ctx, site)
+        df = expansion.run(cfg, b, res, ctx.conn, sizing_kw=_skw(ctx, cfg))
+        df.insert(0, "site", site)
+        out.append(df)
+    pd.concat(out).to_csv(ctx.csv("expansion.csv"), index=False, float_format="%.10g")
+
+
+@step("sizing_check", "phase2")
+def s_sizing_check(ctx):
+    import sizing_check
+    from run_scenarios import make_load_builder
+    specs = [("rwanda", 1.0, 0.0, "flat"), ("kenya", 0.5, 0.5, "tou")]
+    rows, grids = [], []
+    for site, pen, phi, mode in specs:
+        cfg = ctx.cfg(site)
+        cfg["_tariff_mode"] = mode
+        b = make_load_builder(cfg, ctx.n, pen, phi, ctx.seed)
+        step_pv, step_b = (25.0, 100.0) if ctx.quick else (5.0, 20.0)
+        pv, bt = sizing_check.default_grid(cfg, step_pv, step_b,
+                                           pv=(20, 400), batt=(0, 1400))
+        label = f"{site} pen={pen} phi={phi} {mode}"
+        summ, grid = sizing_check.check(cfg, b, ctx.resource(site), ctx.conn, pv, bt,
+                                        label, _skw(ctx, cfg))
+        rows.append(summ)
+        grids.append(grid.assign(scenario=label))
+        print(f"  {label}: search {summ['search_lcoe']:.4f} vs grid "
+              f"{summ['grid_lcoe']:.4f} ({summ['lcoe_gap_pct']:+.2f}%)")
+    pd.DataFrame(rows).to_csv(ctx.csv("sizing_check.csv"), index=False, float_format="%.10g")
+    pd.concat(grids).to_csv(ctx.csv("sizing_check_grid.csv"), index=False, float_format="%.6g")
+
+
+@step("interannual", "phase2")
+def s_interannual(ctx):
+    import interannual
+    summ, dist = [], []
+    for site in ctx.sites:
+        cfg, b, _, sizing = _headline(ctx, site)
+        s, d = interannual.run(cfg, sizing, b, ctx.all_years(site), ctx.rep_year(site),
+                               ctx.conn, _skw(ctx, cfg))
+        summ.append({"site": site, **s})
+        dist.append(d.assign(site=site))
+    pd.DataFrame(summ).to_csv(ctx.csv("interannual_summary.csv"), index=False,
+                              float_format="%.10g")
+    pd.concat(dist).to_csv(ctx.csv("interannual_by_year.csv"), index=False,
+                           float_format="%.10g")
+
+
+@step("ensemble", "phase2")
+def s_ensemble(ctx):
+    import ensemble
+    seeds = range(1, 4) if ctx.quick else range(1, 25)
+    per, summ = [], []
+    for site in ctx.sites:
+        cfg = ctx.cfg(site)
+        t = time.time()
+        df = ensemble.run(cfg, ctx.resource(site), ctx.n, ctx.conn, seeds,
+                          sizing_kw=_skw(ctx, cfg))
+        per.append(df.assign(site=site))
+        summ.append(ensemble.summarise(df).assign(site=site))
+        print(f"  ensemble {site}: {len(df)} seeds in {time.time()-t:.0f}s")
+    pd.concat(per).to_csv(ctx.csv("ensemble_seeds.csv"), index=False, float_format="%.10g")
+    pd.concat(summ).to_csv(ctx.csv("ensemble_summary.csv"), index=False,
+                           float_format="%.10g")
+
+
+@step("tou_sweep", "phase2")
+def s_tou_sweep(ctx):
+    import tou_sweep
+    sweeps, be = [], []
+    for site in ctx.sites:
+        cfg = ctx.cfg(site)
+        for response in ("step", "elastic"):
+            df, _ = tou_sweep.sweep(cfg, ctx.resource(site), ctx.n, ctx.conn,
+                                    ctx.seed, response=response,
+                                    sizing_kw=_skw(ctx, cfg))
+            sweeps.append(df.assign(site=site))
+            if response == "step":
+                be.append(tou_sweep.break_even_discount(df).assign(
+                    site=site, step_function=tou_sweep.is_step_function(df)))
+    pd.concat(sweeps).to_csv(ctx.csv("tou_sweep.csv"), index=False, float_format="%.10g")
+    pd.concat(be).to_csv(ctx.csv("tou_break_even.csv"), index=False, float_format="%.10g")
+
+
+@step("esmap", "phase2")
+def s_esmap(ctx):
+    import esmap
+    wf, comp = [], []
+    for site in ctx.sites:
+        cfg, b, res, sizing = _headline(ctx, site)
+        wf.append(esmap.waterfall(cfg, b, res, ctx.conn, _skw(ctx, cfg)).assign(site=site))
+        comp.append({"site": site, **esmap.lcoe_components(cfg, sizing, b, res)})
+    pd.concat(wf).to_csv(ctx.csv("esmap_waterfall.csv"), index=False, float_format="%.10g")
+    pd.DataFrame(comp).to_csv(ctx.csv("lcoe_components.csv"), index=False,
+                              float_format="%.10g")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)

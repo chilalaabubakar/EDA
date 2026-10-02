@@ -68,8 +68,13 @@ def design_year_unmet(cfg, sizing, load_builder, resource, design_year,
     return r["unmet"].sum() / load.sum()
 
 
-def _reliability(m, metric):
-    return m["worst_year_unmet_fraction"] if metric == "worst_year" else m["unmet_fraction"]
+def _reliability(m, metric, design_year=None):
+    """worst_year: worst year up to and including the design year (all years
+    when the design year is the last). lifetime: the v4 metric."""
+    if metric == "worst_year":
+        by = m["unmet_fraction_by_year"]
+        return max(by[:design_year] if design_year else by)
+    return m["unmet_fraction"]
 
 
 def _sizing(cfg, pv, bt, connections, load_builder, design_year):
@@ -135,7 +140,7 @@ def size_system(cfg, load_builder, resource, connections, verbose=False, **kw):
         found = 0
         for bt in fine:
             s, m = evaluate(pv, bt)
-            ok = _reliability(m, o["reliability_metric"]) <= o["max_unmet"]
+            ok = _reliability(m, o["reliability_metric"], dy) <= o["max_unmet"]
             trace.append({**s, "lcoe": m["lcoe"], "npv": m["npv"], "feasible": ok,
                           "unmet_fraction": m["unmet_fraction"],
                           "worst_year_unmet_fraction": m["worst_year_unmet_fraction"]})
@@ -163,7 +168,7 @@ def full_grid_search(cfg, load_builder, resource, connections, pv_values,
         for bt in batt_values:
             s = _sizing(cfg, pv, bt, connections, load_builder, dy)
             _, m = simulate(cfg, s, load_builder, resource, tariff_mode=mode)
-            ok = _reliability(m, reliability_metric) <= max_unmet
+            ok = _reliability(m, reliability_metric, dy) <= max_unmet
             rows.append({**s, "lcoe": m["lcoe"], "feasible": ok,
                          "worst_year_unmet_fraction": m["worst_year_unmet_fraction"],
                          "unmet_fraction": m["unmet_fraction"]})

@@ -7,9 +7,11 @@ BASE_CFG = {
  "pv":{"temp_coeff_per_c":-0.004,"noct_c":45,"derate_factor":0.85,"degradation_rate":0.008},
  "battery":{"round_trip_efficiency":0.90,"depth_of_discharge":0.80,"cycle_life":3000,
             "replacement_year":10,"max_c_rate":0.5},
- # inverter_sizing: "pv" = v4 convention (pv_kw / dc_ac_ratio, battery output
- # not inverter-limited). Phase 2 switches the headline to "load".
- "bos":{"inverter_eff":0.97,"dc_ac_ratio":1.2,"inverter_sizing":"pv",
+ # inverter_sizing (Phase 2): "load" = one hybrid inverter rated to the
+ # design-year peak load x 1.25 headroom, capping total AC output (PV and
+ # battery). "pv" = v4 convention, pv_kw / dc_ac_ratio, which over-sized the
+ # inverter as PV grew with cooking load and never limited battery output.
+ "bos":{"inverter_eff":0.97,"dc_ac_ratio":1.2,"inverter_sizing":"load",
         "inverter_headroom":1.25,"inverter_step_kw":5.0},
  "capex":{"pv_per_kw":1228,            # SEforALL solar share 18% x $6,824
           "battery_per_kwh":300,       # ESMAP mini-grid range $100-300/kWh, upper bound

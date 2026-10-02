@@ -332,6 +332,13 @@ def s_household_cost(ctx):
     pd.concat(rows).to_csv(ctx.csv("household_cost.csv"), index=False, float_format="%.10g")
 
 
+# --------------------------------------------------------------------- phase 4
+@step("figures", "phase4")
+def s_figures(ctx):
+    import figures
+    print("  figures ->", figures.build(ctx.results))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)

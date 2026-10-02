@@ -165,6 +165,31 @@ def headline_numbers(S, F, B, D, base_rate=0.12, discount=None):
     return out
 
 
+def phase_numbers(R):
+    """Optional numbers from Phase 2/3 outputs, when present."""
+    out = {}
+    R = Path(R)
+    if (R / "ensemble_summary.csv").exists():
+        e = pd.read_csv(R / "ensemble_summary.csv")
+        out["ens_n_seeds"] = int(e.n_seeds.max())
+        for _, r in e.iterrows():
+            k = f"ens_{r.quantity}_{r.site}"
+            out[k], out[k + "_lo"], out[k + "_hi"] = r["mean"], r.ci95_lo, r.ci95_hi
+    if (R / "operating_subsidy.csv").exists():
+        o = pd.read_csv(R / "operating_subsidy.csv").set_index("site")
+        for site in SITES:
+            if site in o.index:
+                out[f"opsub_{site}"] = o.loc[site, "opsub_grant0_usd_per_conn_year"]
+    return out
+
+
+def render_abstract(numbers, template=Path(__file__).resolve().parents[1]
+                    / "manuscript" / "abstract_template.md"):
+    import re as _re
+    text = _re.sub(r"<!--.*?-->", "", Path(template).read_text(), flags=_re.S).strip()
+    return text.format_map(numbers)
+
+
 def build_all(results="results", validation=None):
     R = Path(results)
     S = pd.read_csv(R / "scenarios_both.csv")
@@ -175,7 +200,7 @@ def build_all(results="results", validation=None):
         validation = pd.read_csv(R / "cooking_validation_summary.csv")
     tables = {1: table1(), 2: table2(validation), 3: table3(S), 4: table4(F),
               5: table5(B), 6: table6(D)}
-    return tables, headline_numbers(S, F, B, D)
+    return tables, {**headline_numbers(S, F, B, D), **phase_numbers(R)}
 
 
 def to_markdown(df):
@@ -200,7 +225,12 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--results", default="results")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--abstract", action="store_true",
+                    help="print the abstract rendered from the results")
     a = ap.parse_args()
+    if a.abstract:
+        print(render_abstract(build_all(a.results)[1]))
+        return
     tables, numbers = build_all(a.results)
     write(tables, numbers, a.out or Path(a.results) / "tables")
     for n, t in tables.items():

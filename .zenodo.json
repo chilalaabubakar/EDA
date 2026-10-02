@@ -1,0 +1,12 @@
+{
+  "title": "eCooking mini-grid model: electric cooking, tariff structure and the mini-grid viability gap in Rwanda and Kenya",
+  "upload_type": "software",
+  "description": "Hourly dispatch, least-cost sizing and financial model for solar-battery mini-grids with electric cooking, used for the paper 'Cheaper kilowatt-hours, unviable projects' (African Energy Futures, Nairobi, 2026). Includes the full test-suite and the pipeline that regenerates every table and figure. Survey microdata are not included; see docs/DATA_ACCESS.md.",
+  "creators": [{"name": "TO FILL, TO FILL", "affiliation": "TO FILL"}],
+  "license": "MIT",
+  "keywords": ["mini-grids", "electric cooking", "time-of-use tariffs", "energy access", "Rwanda", "Kenya"],
+  "related_identifiers": [
+    {"identifier": "10.48529/x75v-fm71", "relation": "references", "scheme": "doi"},
+    {"identifier": "10.48529/230v-e158", "relation": "references", "scheme": "doi"}
+  ]
+}

@@ -17,8 +17,16 @@ def headline_sizing(scenarios, site, n_households, connections,
                   & (scenarios.tariff == "flat")]
     pen = s.penetration.max() if penetration is None else penetration
     r = s[s.penetration == pen].iloc[0]
-    return {"pv_kw": float(r.pv_kw), "battery_kwh": float(r.battery_kwh),
-            "connections": connections, "households": n_households}, float(pen)
+    return sizing_from_row(r, connections, n_households), float(pen)
+
+
+def sizing_from_row(r, connections, n_households):
+    """Rebuild a sizing dict from a scenarios CSV row, inverter included."""
+    out = {"pv_kw": float(r.pv_kw), "battery_kwh": float(r.battery_kwh),
+           "connections": connections, "households": n_households}
+    if "inverter_limits_battery" in r and bool(r.inverter_limits_battery):
+        out.update(inverter_kw=float(r.inverter_kw), inverter_limits_battery=True)
+    return out
 
 
 def viability(scenarios, resources, n_households, connections, seed=42):

@@ -543,8 +543,9 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
     metrics["curtailed_fraction"] = float(
         df.curtailed_kwh.sum() / produced) if produced > 0 else 0.0
     metrics["unmet_fraction"] = float(df.unmet_kwh.sum() / df.demand_kwh.sum())
-    metrics["worst_year_unmet_fraction"] = float(
-        (df.unmet_kwh / df.demand_kwh).max())
+    by_year = (df.unmet_kwh / df.demand_kwh).tolist()
+    metrics["unmet_fraction_by_year"] = by_year
+    metrics["worst_year_unmet_fraction"] = float(max(by_year))
     metrics["peak_load_kw"] = peak_load
     metrics["max_balance_residual_kw"] = float(df.balance_residual_kw.max())
     metrics["capex_items"] = capex_items

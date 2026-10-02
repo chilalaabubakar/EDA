@@ -101,6 +101,7 @@ def scenario_row(cfg, resource, n_households, connections, pen, phi, tariff,
     row.update({
         "pv_kw": s["pv_kw"], "battery_kwh": s["battery_kwh"],
         "inverter_kw": m["capex_items"]["inverter"] / cfg["capex"]["inverter_per_kw"],
+        "inverter_limits_battery": bool(s.get("inverter_limits_battery", False)),
         "lcoe": m["lcoe"], "npv": m["npv"], "irr": m["irr"],
         "unmet_fraction": m["unmet_fraction"],
         "worst_year_unmet_fraction": m["worst_year_unmet_fraction"],

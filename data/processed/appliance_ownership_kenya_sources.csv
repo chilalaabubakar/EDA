@@ -1,0 +1,18 @@
+appliance,M3 asset flags,core m_m_3_group
+radio,0.0675,0.3931
+tv_colour,0.0959,0.348
+incandescent_bulb,0.0829,0.2557
+vcd_dvd,0.0733,0.2025
+mobile_charger,0.039,0.1956
+fluorescent_tube,0.044,0.1722
+tv_flat,0.0421,0.1619
+smartphone_charger,0.0319,0.1579
+electric_iron,0.0348,0.1201
+cfl_bulb,0.0202,0.116
+led_bulb,0.0182,0.1062
+refrigerator,0.004,0.0755
+torch_lantern,0.0252,0.0746
+computer,0.0034,0.0351
+fan,0.0001,0.0199
+kettle,0.0041,0.0134
+tv_bw,0.0028,0.0083

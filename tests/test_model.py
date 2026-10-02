@@ -21,7 +21,7 @@ CFG = {
                 "start_soc_fraction": 0.5, "max_c_rate": 0.5,
                 "eol_capacity_loss": 0.2},
     "bos": {"inverter_eff": 0.97, "dc_ac_ratio": 1.2},
-    "capex": {"pv_per_kw": 900, "battery_per_kwh": 350, "diesel_per_kw": 500,
+    "capex": {"pv_per_kw": 900, "battery_per_kwh": 350,
               "inverter_per_kw": 300, "connection_per_customer": 250,
               "soft_cost_fraction": 0.15},
     # These tests are about battery physics, energy balance and tariffs, not
@@ -29,14 +29,13 @@ CFG = {
     # It is now named explicitly because model.py refuses to guess.
     "opex": {"basis": "capex_fraction",
              "om_fraction_of_capex_per_year": 0.03, "staff_annual": 3000,
-             "escalation_rate": 0.03, "fuel_cost_per_litre": 1.35,
-             "fuel_escalation_rate": 0.05},
+             "escalation_rate": 0.03},
     "finance": {"discount_rate_real": 0.12, "tax_rate": 0.0,
                 "project_life_years": 20},
     "tariff": {"flat_rate_per_kwh": 0.60, "daytime_discount_per_kwh": 0.10,
                "daytime_window_hours": [9, 16], "collection_rate": 0.95},
 }
-SIZING = {"pv_kw": 150, "battery_kwh": 400, "diesel_kw": 40, "connections": 240}
+SIZING = {"pv_kw": 150, "battery_kwh": 400, "connections": 240}
 
 
 def make_resource(seed=42):
@@ -212,13 +211,13 @@ def test_seeded_resource_is_reproducible():
 # ------------------------------------------------------------- sanity checks
 def test_more_battery_reduces_unmet_demand():
     r = make_resource()
-    _, small = simulate(CFG, {**SIZING, "battery_kwh": 100, "diesel_kw": 0}, loads, r)
-    _, big = simulate(CFG, {**SIZING, "battery_kwh": 800, "diesel_kw": 0}, loads, r)
+    _, small = simulate(CFG, {**SIZING, "battery_kwh": 100}, loads, r)
+    _, big = simulate(CFG, {**SIZING, "battery_kwh": 800}, loads, r)
     assert big["unmet_fraction"] <= small["unmet_fraction"]
 
 
-def test_zero_pv_and_zero_battery_serves_nothing_without_diesel():
-    _, m = simulate(CFG, {"pv_kw": 0, "battery_kwh": 0, "diesel_kw": 0,
+def test_zero_pv_and_zero_battery_serves_nothing():
+    _, m = simulate(CFG, {"pv_kw": 0, "battery_kwh": 0,
                           "connections": 240}, loads, make_resource())
     assert m["unmet_fraction"] == pytest.approx(1.0)
 

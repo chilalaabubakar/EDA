@@ -58,19 +58,18 @@ def test_seeding_numpy_alone_is_not_sufficient():
 
 # ------------------------------------------------- defect 2: OPEX basis
 CFG = {
-    "capex": {"pv_per_kw": 1228, "battery_per_kwh": 300, "diesel_per_kw": 700,
+    "capex": {"pv_per_kw": 1228, "battery_per_kwh": 300,
               "inverter_per_kw": 400, "connection_per_customer": 400,
               "soft_cost_fraction": 0.333},
     "bos": {"inverter_eff": 0.97, "dc_ac_ratio": 1.2},
     "opex": {"basis": "per_customer", "per_customer_year": 80.0,
              "om_fraction_of_capex_per_year": 0.04, "staff_annual": 6000,
-             "escalation_rate": 0.05, "fuel_escalation_rate": 0.05,
-             "fuel_cost_per_litre": 2.0},
+             "escalation_rate": 0.05},
     "finance": {"discount_rate_real": 0.12, "tax_rate": 0.0,
                 "project_life_years": 20},
     "battery": {"replacement_year": 10},
 }
-SIZING = {"pv_kw": 305, "battery_kwh": 640, "diesel_kw": 0.0,
+SIZING = {"pv_kw": 305, "battery_kwh": 640,
           "connections": 300, "households": 300}
 
 
@@ -105,7 +104,7 @@ def test_capital_grant_does_not_reduce_operating_cost():
     operating cost by 95% and flattered the capital-subsidy solver.
     """
     cfg = copy.deepcopy(CFG); cfg["opex"]["basis"] = "capex_fraction"
-    annual = [{"year": y, "revenue": 5e4, "fuel_l": 0.0, "served_kwh": 3e5,
+    annual = [{"year": y, "revenue": 5e4, "served_kwh": 3e5,
                "unmet_kwh": 0.0, "demand_kwh": 3e5, "curtailed_kwh": 0.0}
               for y in range(1, 21)]
 
@@ -160,16 +159,22 @@ def test_measured_duration_variant_exists_and_differs():
     assert any(a[k][2] != m[k][2] for k in a), "measured durations identical"
 
 
-# ------------------------------------- defect 5: diesel is declared, not default
-def test_diesel_is_explicit_in_the_config():
-    assert "diesel_kw" in final_cfg.BASE_CFG, (
-        "diesel capacity must be stated, not left to a .get() default")
+# --------------------------------------------- defect 5: diesel cut, not idle
+def test_diesel_is_gone_from_model_and_config():
+    """Every published scenario ran diesel_kw = 0. The generator, its fuel cost
+    and the fuel-price references were cut rather than left looking live."""
+    import model
+    assert not hasattr(model, "DieselGenerator")
+    assert "diesel_kw" not in final_cfg.BASE_CFG
+    assert "diesel_per_kw" not in final_cfg.BASE_CFG["capex"]
+    assert "fuel_cost_per_litre" not in final_cfg.BASE_CFG["opex"]
+    for site in ("rwanda", "kenya"):
+        assert "fuel_cost_per_litre" not in final_cfg.country_cfg(site)["opex"]
 
 
-def test_published_results_are_solar_plus_storage_only():
-    assert final_cfg.BASE_CFG["diesel_kw"] == 0.0, (
-        "diesel is now non-zero: s3.4 and the fuel-price references become "
-        "live and every published table must be re-run")
+def test_capex_has_no_diesel_line():
+    _, items = capex(CFG, SIZING)
+    assert "diesel" not in items
 
 
 # ------------------------------------------------- curtailment is now reported
@@ -194,3 +199,49 @@ def test_curtailment_is_surfaced_in_metrics():
     _, m = simulate(cfg, SIZING, load, {"ghi": ghi, "tair": tair})
     assert "curtailed_fraction" in m
     assert 0.0 <= m["curtailed_fraction"] < 1.0
+
+
+# ------------------------------- Kenya ownership source is an explicit switch
+def test_kenya_source_switch_is_resolved_at_call_time():
+    m3 = final_cfg.country_cfg("kenya", kenya_source="m3")["appliances"]
+    core = final_cfg.country_cfg("kenya", kenya_source="core")["appliances"]
+    assert m3 is final_cfg.APPLIANCES_KENYA
+    assert core is final_cfg.APPLIANCES_KENYA_CORE
+    # the core multi-select records several times the M3 ownership
+    assert core["tv_colour"][0] > 3 * m3["tv_colour"][0]
+    with pytest.raises(ValueError):
+        final_cfg.country_cfg("kenya", kenya_source="guess")
+
+
+# ------------------------------------- reliability constraint as s3.5 states
+def test_sized_systems_meet_the_constraint_in_every_year():
+    """v4 accepted on lifetime-average unmet; year 20 ran at 7-12%."""
+    from resource import synthetic_years
+    from run_scenarios import make_load_builder
+    from sizing import size_system
+    cfg = final_cfg.country_cfg("rwanda")
+    b = make_load_builder(cfg, 300, 1.0, 0.0, 42)
+    s, m, _ = size_system(cfg, b, synthetic_years("rwanda")[2015], 300,
+                          pv_range=(100, 400), batt_range=(0, 1500))
+    assert m["worst_year_unmet_fraction"] <= 0.05 + 1e-12
+
+
+def test_lcoe_uses_gross_capex_under_a_grant():
+    """LCOE is a cost metric: a grant changes who pays, not what it costs."""
+    h = np.arange(8760) % 24
+    res = {"ghi": np.clip(np.sin((h - 6) / 12 * np.pi), 0, None) * 950,
+           "tair": np.full(8760, 25.0)}
+    cfg = copy.deepcopy(CFG)
+    cfg.update({"pv": {"temp_coeff_per_c": -0.004, "noct_c": 45,
+                       "derate_factor": 0.85},
+                "battery": {"round_trip_efficiency": 0.9, "depth_of_discharge": 0.8,
+                            "cycle_life": 3000, "replacement_year": 10},
+                "tariff": {"flat_rate_per_kwh": 0.15, "bands": None,
+                           "collection_rate": 0.9, "daytime_discount_per_kwh": 0,
+                           "daytime_window_hours": [9, 16]}})
+    load = lambda y: np.full(8760, 20.0)
+    _, a = simulate(cfg, SIZING, load, res)
+    g = copy.deepcopy(cfg); g["capex"]["_grant_fraction"] = 0.6
+    _, b = simulate(g, SIZING, load, res)
+    assert a["lcoe"] == pytest.approx(b["lcoe"])
+    assert b["npv"] > a["npv"]

@@ -1,0 +1,34 @@
+# Headline numbers quoted in the running text, checked against
+# results/tables/headline_numbers.csv by tests/test_manuscript_numbers.py.
+#
+# pattern : regex matched against the manuscript text; one capture group per
+#           entry in `values`
+# values  : [key, format] pairs; key from manuscript_tables.headline_numbers()
+#
+# When the text is rewritten, update the pattern here in the same commit.
+# A pattern that no longer matches FAILS the test rather than skipping,
+# so a claim cannot silently drop out of checking.
+claims:
+  - id: abstract_lcoe_reduction
+    pattern: 'Levelised cost falls by (\d+)% in Rwanda and (\d+)% in Kenya'
+    values: [[lcoe_reduction_pct_rwanda, "{:.0f}"], [lcoe_reduction_pct_kenya, "{:.0f}"]]
+  - id: abstract_avoided_storage
+    pattern: 'displaces (\d+)% of battery capacity in Rwanda and (\d+)% in Kenya'
+    values: [[avoided_storage_pct_rwanda, "{:.0f}"], [avoided_storage_pct_kenya, "{:.0f}"]]
+  - id: abstract_tou_lcoe
+    pattern: 'lowering levelised cost by a further (\d+) to (\d+) per cent'
+    values: [[tou_lcoe_reduction_pct_min, "{:.0f}"], [tou_lcoe_reduction_pct_max, "{:.0f}"]]
+  - id: abstract_multiple
+    pattern: 'viability is ([\d.]+) times the regulated rate in Rwanda and ([\d.]+) times in Kenya'
+    values: [[multiple_base_rwanda, "{:.1f}"], [multiple_base_kenya, "{:.1f}"]]
+  - id: abstract_multiple_20pct
+    pattern: 'rising to between (\d+) and (\d+) times at a 20% cost of capital'
+    values: [[multiple_max_rate_min, "{:.0f}"], [multiple_max_rate_max, "{:.0f}"]]
+  - id: abstract_band_penalty
+    pattern: 'blended rate rise ([\d.]+)-fold, from \$([\d.]+) to \$([\d.]+) per kilowatt-hour, against ([\d.]+)-fold in Kenya'
+    values: [[band_factor_year1_rwanda, "{:.1f}"], [blended_pre_year1_rwanda, "{:.3f}"],
+             [blended_post_year1_rwanda, "{:.3f}"], [band_factor_year1_kenya, "{:.1f}"]]
+  - id: s51_lcoe_levels
+    pattern: 'falls from \$([\d.]+) to \$([\d.]+) per kWh in Rwanda, a reduction of (\d+)%, and from \$([\d.]+) to \$([\d.]+) in Kenya, a reduction of (\d+)%'
+    values: [[lcoe_zero_rwanda, "{:.2f}"], [lcoe_full_rwanda, "{:.2f}"], [lcoe_reduction_pct_rwanda, "{:.0f}"],
+             [lcoe_zero_kenya, "{:.2f}"], [lcoe_full_kenya, "{:.2f}"], [lcoe_reduction_pct_kenya, "{:.0f}"]]

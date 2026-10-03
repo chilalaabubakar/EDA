@@ -7,9 +7,21 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def test_figure_palette_is_the_validated_one():
+def _contrast_on_white(hex_colour):
+    def lin(c):
+        c = int(c, 16) / 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    h = hex_colour.lstrip("#")
+    lum = 0.2126 * lin(h[0:2]) + 0.7152 * lin(h[2:4]) + 0.0722 * lin(h[4:6])
+    return 1.05 / (lum + 0.05)
+
+
+def test_figure_palette_is_the_house_one():
+    """figures4papers palette: Rwanda dark blue, Kenya strong red, teal third."""
     import figures
-    assert figures.SERIES == ["#2a78d6", "#eb6834", "#1baf7a"]
+    assert figures.SERIES == ["#0F4D92", "#B64342", "#42949E"]
+    # every series line is readable on white (WCAG 3:1 for graphics)
+    assert all(_contrast_on_white(c) >= 3 for c in figures.SERIES)
     # identity never by colour alone: each slot has its own marker and style
     assert len(set(figures.MARKERS)) == len(figures.SERIES)
     assert len(set(figures.STYLES)) == len(figures.SERIES)

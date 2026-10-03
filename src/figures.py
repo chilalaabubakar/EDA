@@ -2,14 +2,18 @@
 
     python src/figures.py --results results
 
-Conventions (checked by tests/test_figures.py):
-  * colour: validated categorical slots (blue, orange, aqua) - CVD-safe on
-    every pair (worst deltaE 9.2, deutan). Aqua is below 3:1 contrast on white,
-    so every series is ALSO direct-labelled and carries its own marker and
-    line style: identity never rests on colour alone, and figures survive
-    greyscale printing.
+House style follows the figures4papers "scientific-figure-making" guide
+(github.com/ChenLiu-1996/figures4papers):
+  * Arial/Helvetica-type sans serif, top and right spines off, thicker axes,
+    no grid, frameless legends
+  * its blue / green / red / neutral palette: Rwanda dark blue, Kenya strong
+    red, gains in green, reference bars in neutral grey; bars carry black
+    edges and their values are printed on them
+  * every series is ALSO direct-labelled and carries its own marker and line
+    style, so identity never rests on colour alone and figures survive
+    greyscale printing
   * one y-axis per panel - two measures become two panels, never a twin axis
-  * 300 dpi PNG plus vector PDF
+  * 300 dpi PNG plus vector PDF with editable text, tight_layout(pad=1)
   * captions in figures/captions.md are self-sufficient: what, where, which
     scenario, which units, and the source CSV
 """
@@ -22,20 +26,30 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 
-SERIES = ["#2a78d6", "#eb6834", "#1baf7a"]          # validated slots 1-3
+PALETTE = {"blue_main": "#0F4D92", "blue_secondary": "#3775BA",
+           "green_1": "#DDF3DE", "green_2": "#AADCA9", "green_3": "#8BCF8B",
+           "red_1": "#F6CFCB", "red_2": "#E9A6A1", "red_strong": "#B64342",
+           "neutral": "#CFCECE", "teal": "#42949E"}
+SERIES = [PALETTE["blue_main"], PALETTE["red_strong"], PALETTE["teal"]]
 MARKERS = ["o", "s", "^"]
 STYLES = ["-", "--", ":"]
-INK, INK2, GRID = "#0b0b0b", "#52514e", "#e4e3df"
+INK, INK2 = "#272727", "#4D4D4D"
 SITE = {"rwanda": "Rwanda (Nkombo)", "kenya": "Kenya (Ringiti)"}
 DPI = 300
 
 plt.rcParams.update({
-    "font.size": 9, "axes.titlesize": 9.5, "axes.labelsize": 9,
-    "axes.edgecolor": INK2, "axes.labelcolor": INK, "xtick.color": INK2,
-    "ytick.color": INK2, "text.color": INK, "axes.grid": True,
-    "grid.color": GRID, "grid.linewidth": 0.6, "axes.spines.top": False,
-    "axes.spines.right": False, "legend.frameon": False, "lines.linewidth": 1.8,
-    "lines.markersize": 6, "savefig.bbox": "tight", "pdf.fonttype": 42,
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Helvetica", "Liberation Sans", "DejaVu Sans"],
+    "font.size": 10, "axes.titlesize": 10.5, "axes.titleweight": "bold",
+    "axes.labelsize": 10, "xtick.labelsize": 9, "ytick.labelsize": 9,
+    "axes.linewidth": 1.2, "xtick.major.width": 1.2, "ytick.major.width": 1.2,
+    "xtick.major.size": 4, "ytick.major.size": 4,
+    "axes.edgecolor": INK, "axes.labelcolor": INK, "xtick.color": INK,
+    "ytick.color": INK, "text.color": INK, "axes.grid": False,
+    "axes.spines.top": False, "axes.spines.right": False,
+    "legend.frameon": False, "lines.linewidth": 2.2, "lines.markersize": 6.5,
+    "savefig.bbox": "tight", "savefig.pad_inches": 0.04, "savefig.facecolor": "white",
+    "pdf.fonttype": 42, "svg.fonttype": "none",
 })
 
 
@@ -45,11 +59,13 @@ def style(i):
 
 def label_end(ax, x, y, text, i, dx=4, dy=0):
     ax.annotate(text, (x, y), xytext=(dx, dy), textcoords="offset points",
-                color=INK, fontsize=8, va="center")
+                color=SERIES[i] if i < len(SERIES) else INK, fontsize=9,
+                fontweight="bold", va="center")
 
 
 def save(fig, out, name):
     out.mkdir(parents=True, exist_ok=True)
+    fig.tight_layout(pad=1)
     fig.savefig(out / f"{name}.png", dpi=DPI)
     fig.savefig(out / f"{name}.pdf")
     plt.close(fig)
@@ -57,32 +73,38 @@ def save(fig, out, name):
 
 # ------------------------------------------------------------------ figure 1
 def fig1_structure(out):
-    fig, ax = plt.subplots(figsize=(6.8, 2.9))
+    fig, ax = plt.subplots(figsize=(6.8, 2.3))
     ax.set_axis_off()
-    ax.set_xlim(0, 10); ax.set_ylim(0, 4.2)
+    ax.set_xlim(0, 10); ax.set_ylim(0.95, 4.15)
     boxes = {
-        "demand": (0.2, 1.6, "Stochastic demand\nRAMP appliances +\ncooking events (φ)"),
-        "dispatch": (2.7, 1.6, "Hourly dispatch\nPV → load → battery\n(8,760 h × 20 yr)"),
-        "sizing": (5.2, 1.6, "Least-cost sizing\nworst-year\nunmet ≤ 5%"),
-        "finance": (7.7, 1.6, "Finance\nLCOE, NPV, IRR,\ninverse solvers"),
+        "demand": (0.2, 1.6, "Household demand\nRAMP appliances +\ncooking meals (φ)"),
+        "dispatch": (2.7, 1.6, "Hourly operation\nsolar, load, battery\n(8,760 h × 20 yr)"),
+        "sizing": (5.2, 1.6, "Least-cost sizing\nunserved demand\n≤ 5% in every year"),
+        "finance": (7.7, 1.6, "Finance\nLCOE, NPV and\nfunding gap"),
     }
     for x, y, t in boxes.values():
-        ax.add_patch(plt.Rectangle((x, y), 2.1, 1.2, fc="#f3f2ef", ec=INK2, lw=0.8))
-        ax.text(x + 1.05, y + 0.6, t, ha="center", va="center", fontsize=7.5)
+        ax.add_patch(plt.Rectangle((x, y), 2.1, 1.2, fc="#E8EEF6",
+                                   ec=PALETTE["blue_main"], lw=1.6))
+        head, rest = t.split("\n", 1)
+        ax.text(x + 1.05, y + 0.86, head, ha="center", va="center", fontsize=8.5,
+                fontweight="bold", color=PALETTE["blue_main"])
+        ax.text(x + 1.05, y + 0.42, rest, ha="center", va="center", fontsize=7.5)
     for a, b in (("demand", "dispatch"), ("dispatch", "sizing"), ("sizing", "finance")):
         xa, ya = boxes[a][0] + 2.1, boxes[a][1] + 0.6
         ax.annotate("", (boxes[b][0], ya), (xa, ya),
-                    arrowprops=dict(arrowstyle="->", color=INK, lw=1.0))
+                    arrowprops=dict(arrowstyle="-|>", color=INK, lw=1.4,
+                                    mutation_scale=12))
     inputs = [(1.25, "MTF microdata\n(ownership, dayparts)", "demand"),
-              (3.75, "NASA POWER\nGHI, T (LST)", "dispatch"),
+              (3.75, "NASA POWER\nsolar and temperature", "dispatch"),
               (6.25, "AMDA / SEforALL\ncost benchmarks", "sizing"),
               (8.75, "RURA / EPRA\ntariff schedules", "finance")]
     for x, t, b in inputs:
-        ax.text(x, 3.75, t, ha="center", va="center", fontsize=7, color=INK2)
+        ax.text(x, 3.75, t, ha="center", va="center", fontsize=7.5, color=INK2)
         ax.annotate("", (x, 2.8), (x, 3.4), arrowprops=dict(
-            arrowstyle="->", color=INK2, lw=0.8, linestyle=(0, (3, 2))))
-    ax.text(5.0, 0.8, "scenario sweep: penetration × φ × tariff × discount × seed",
-            ha="center", fontsize=7.5, color=INK2)
+            arrowstyle="-|>", color=INK2, lw=1.0, linestyle=(0, (3, 2)),
+            mutation_scale=10))
+    ax.text(5.0, 1.15, "scenarios: share cooking × φ × tariff × discount × random seed",
+            ha="center", fontsize=8, color=INK2, style="italic")
     save(fig, out, "fig1_model_structure")
 
 
@@ -93,7 +115,7 @@ def fig2_cooking(out, n=300, seeds=range(10)):
                     for s in seeds], axis=0) * 1000 / n
     fig, ax = plt.subplots(figsize=(5.2, 2.8))
     for a, b, lab in ((6, 9, "breakfast"), (12, 14, "lunch"), (19, 21, "supper")):
-        ax.axvspan(a - 0.5, b - 0.5, color="#ecebe7", lw=0, zorder=0)
+        ax.axvspan(a - 0.5, b - 0.5, color=PALETTE["green_1"], lw=0, zorder=0)
         ax.text((a + b) / 2 - 0.5, prof.max() * 1.07, lab, ha="center",
                 fontsize=7.5, color=INK2)
     ax.plot(np.arange(24), prof, **style(0))
@@ -155,27 +177,25 @@ def fig5_bands(B, out):
     from final_cfg import country_cfg
     from model import _band_rate
     kwh = np.linspace(1, 120, 480)
-    fig, ax = plt.subplots(figsize=(5.2, 3.0))
+    fig, ax = plt.subplots(figsize=(5.6, 3.2))
     for i, site in enumerate(SITE):
         t = country_cfg(site)["tariff"]
         ax.plot(kwh, [_band_rate(k, t) for k in kwh], color=SERIES[i],
-                linestyle=STYLES[i])
+                linestyle=STYLES[i], lw=2.4)
         sim = B[(B.site == site) & (B.basis == "simulated")]
         for _, r in sim[sim.year.isin([1, 20])].iterrows():
             ax.plot(r.kwh_full_ecooking, r.rate_full_ecooking, marker=MARKERS[i],
-                    color=SERIES[i], linestyle="none", mec="white", mew=1.0)
+                    color=SERIES[i], linestyle="none", mec="black", mew=1.0, ms=7,
+                    zorder=5)
             ax.annotate(f"yr {int(r.year)}", (r.kwh_full_ecooking, r.rate_full_ecooking),
-                        xytext=(-22, 6) if i == 0 else (3, -11), textcoords="offset points",
-                        fontsize=7, color=INK2)
-        label_end(ax, kwh[-1], _band_rate(kwh[-1], t), SITE[site].split()[0], i)
+                        xytext=(-26, 6) if i == 0 else (4, -13), textcoords="offset points",
+                        fontsize=8, color=SERIES[i])
+        label_end(ax, kwh[-1], _band_rate(kwh[-1], t),
+                  ["Rwanda\n(block tariff)", "Kenya\n(single band)"][i], i)
     ax.set_xlabel("household consumption, kWh/month")
     ax.set_ylabel("blended tariff, US$/kWh")
-    ax.set_xlim(0, 138); ax.set_ylim(0, None)
-    from matplotlib.lines import Line2D
-    handles = [Line2D([], [], color=SERIES[i], linestyle=STYLES[i], marker=MARKERS[i])
-               for i in range(len(SITE))]
-    ax.legend(handles, [f"{SITE[s]} ({'telescopic' if i == 0 else 'non-telescopic'})"
-                        for i, s in enumerate(SITE)], loc="lower right", fontsize=7.5)
+    ax.set_xlim(0, 120); ax.set_ylim(0, 0.235)
+    ax.set_xticks(range(0, 121, 20))
     save(fig, out, "fig5_blended_tariff")
 
 
@@ -211,17 +231,17 @@ def fig_tou_operator(T, out, phi=0.5):
     discount, full penetration, one phi. Shows the step response: storage
     avoided is flat in the discount, the revenue given up is not."""
     T = T[(T.response == "step") & (T.phi_nominal == phi)]
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.7))
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
     for i, site in enumerate(SITE):
         g = T[T.site == site].sort_values("discount")
         x = 100 * g.discount
         axes[0].plot(x, g.avoided_battery_kwh, drawstyle="steps-post",
                      color=SERIES[i], linestyle=STYLES[i])
         axes[0].plot(x, g.avoided_battery_kwh, linestyle="none", marker=MARKERS[i],
-                     color=SERIES[i], markersize=4, mec="white", mew=0.6)
+                     color=SERIES[i], markersize=5, mec="black", mew=0.6)
         pos = g[g.discount > 0]
         axes[1].plot(100 * pos.discount, pos.operator_npv_gain / 1000, **style(i),
-                     markersize=4, mec="white", mew=0.6)
+                     markersize=5, mec="black", mew=0.6)
         name = SITE[site].split()[0]
         label_end(axes[0], x.iloc[-1], g.avoided_battery_kwh.iloc[-1], name, i,
                   dy=6 if i else -6)
@@ -232,7 +252,7 @@ def fig_tou_operator(T, out, phi=0.5):
     axes[0].set_ylim(0, T.avoided_battery_kwh.max() * 1.25)
     axes[1].set_title("(b) change in operator NPV", loc="left")
     axes[1].set_ylabel("US$ thousand")
-    axes[1].axhline(0, color=INK2, lw=0.8)
+    axes[1].axhline(0, color=INK2, lw=1.0, ls=(0, (4, 3)))
     axes[1].set_ylim(bottom=-5)
     for ax in axes:
         ax.set_xlabel("daytime discount, US cents/kWh")
@@ -243,33 +263,34 @@ def fig_tou_operator(T, out, phi=0.5):
 
 def fig_esmap(W, out):
     """Cumulative LCOE bridge from the headline to benchmark-like conventions."""
-    steps = ["Headline", "Discount\nrate 10%", "No growth\nreserve",
+    steps = ["This\nstudy", "Discount\nrate 10%", "No growth\nreserve",
              "Demand\nx2", "Bench-\nmark"]
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.9), sharey=True)
-    for ax, site in zip(axes, SITE):
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.2), sharey=True)
+    edge = dict(edgecolor="black", linewidth=1.0, width=0.64)
+    for ax, site, col in zip(axes, SITE, SERIES):
         v = W[W.site == site].lcoe.values
         x = np.arange(len(v) + 1)
-        ax.bar(0, v[0], color="#b8b6ae", width=0.62)
+        ax.bar(0, v[0], color=PALETTE["neutral"], **edge)
         for i in range(1, len(v)):
-            ax.bar(i, v[i] - v[i - 1], bottom=v[i - 1], color="#1baf7a", alpha=0.75,
-                   width=0.62)
+            ax.bar(i, v[i] - v[i - 1], bottom=v[i - 1], color=PALETTE["green_2"],
+                   hatch="///", **edge)
             ax.annotate(f"\u2212{v[i - 1] - v[i]:.2f}", (i, v[i - 1]), xytext=(0, 3),
-                        textcoords="offset points", ha="center", fontsize=7.5)
-            ax.plot([i - 1.31, i - 0.31], [v[i - 1], v[i - 1]], color=INK2, lw=0.6,
+                        textcoords="offset points", ha="center", fontsize=8.5)
+            ax.plot([i - 1.32, i - 0.32], [v[i - 1], v[i - 1]], color=INK2, lw=0.8,
                     ls=":")
-        ax.bar(len(v), v[-1], color="#b8b6ae", width=0.62)
-        ax.plot([len(v) - 1.31, len(v) - 0.31], [v[-1], v[-1]], color=INK2, lw=0.6, ls=":")
+        ax.bar(len(v), v[-1], color=col, **edge)
+        ax.plot([len(v) - 1.32, len(v) - 0.32], [v[-1], v[-1]], color=INK2, lw=0.8, ls=":")
         for i, val in ((0, v[0]), (len(v), v[-1])):
             ax.annotate(f"${val:.2f}", (i, val), xytext=(0, 3), textcoords="offset points",
-                        ha="center", fontsize=7.5, fontweight="bold")
-        ax.axhline(0.55, color=INK2, lw=0.8, ls=(0, (4, 3)))
-        ax.annotate("ESMAP reference $0.55", (2.0, 0.55), xytext=(0, -11),
-                    textcoords="offset points", ha="center", fontsize=7, color=INK2)
+                        ha="center", fontsize=9, fontweight="bold")
+        ax.axhline(0.55, color=PALETTE["red_strong"], lw=1.2, ls=(0, (4, 3)), zorder=0)
+        ax.annotate("ESMAP reference $0.55", (2.0, 0.55), xytext=(0, -12),
+                    textcoords="offset points", ha="center", fontsize=8,
+                    color=PALETTE["red_strong"])
         ax.set_axisbelow(True)
         ax.set_xticks(x)
-        ax.set_xticklabels(steps, fontsize=7)
-        ax.set_title(SITE[site], loc="left")
-        ax.grid(axis="x", visible=False)
+        ax.set_xticklabels(steps, fontsize=8)
+        ax.set_title(SITE[site], loc="left", color=col)
     axes[0].set_ylabel("LCOE, US$/kWh")
     axes[0].set_ylim(0, 1.25)
     fig.tight_layout()

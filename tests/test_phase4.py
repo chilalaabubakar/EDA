@@ -73,3 +73,16 @@ def test_submission_metadata_present():
     for f in ("CITATION.cff", ".zenodo.json", "LICENSE", "docs/DATA_ACCESS.md",
               "manuscript/nomenclature.md"):
         assert (ROOT / f).exists(), f
+
+
+def test_resume_skips_finished_steps(tmp_path):
+    """A rerun with --resume carries on after the last finished step."""
+    import subprocess, sys
+    cmd = [sys.executable, str(ROOT / "src" / "pipeline.py"), "validation",
+           "--synthetic", "--quick", "--results", str(tmp_path)]
+    first = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, check=True)
+    assert "done in" in first.stdout
+    assert (tmp_path / ".steps_done").read_text().split() == ["validation"]
+    again = subprocess.run(cmd + ["--resume"], cwd=ROOT, capture_output=True, text=True,
+                           check=True)
+    assert "already done, skipped" in again.stdout

@@ -7,6 +7,10 @@
 
     --synthetic   use the synthetic resource and write to results/synthetic/.
                   For smoke tests and CI only. Never quote these numbers.
+    --resume      skip steps already finished in this results directory
+                  (listed in <results>/.steps_done). For long runs on Colab,
+                  where the runtime can be reset part-way: rerun the same
+                  command and it carries on from the first unfinished step.
 
 Each step writes CSVs into the results directory; manuscript_tables.py turns
 those into the manuscript tables, and tests/test_manuscript_numbers.py checks
@@ -348,6 +352,8 @@ def main():
     ap.add_argument("--synthetic", action="store_true")
     ap.add_argument("--quick", action="store_true",
                     help="reduced sweep for CI smoke runs")
+    ap.add_argument("--resume", action="store_true",
+                    help="skip steps already finished (see <results>/.steps_done)")
     args = ap.parse_args()
     ctx = Ctx(args)
     if args.synthetic:
@@ -361,11 +367,19 @@ def main():
         names = [n for n, (g, _) in STEPS.items() if g == args.target]
     if not names:
         ap.error(f"unknown target {args.target!r}; steps: {', '.join(STEPS)}")
+    done_file = ctx.results / ".steps_done"
+    done = set(done_file.read_text().split()) if done_file.exists() else set()
     for n in names:
+        if args.resume and n in done:
+            print(f"[{n}] already done, skipped (--resume)")
+            continue
         t = time.time()
-        print(f"[{n}]")
+        print(f"[{n}]", flush=True)
         STEPS[n][1](ctx)
-        print(f"[{n}] done in {time.time()-t:.0f}s")
+        # recorded only after the step has written all its outputs
+        with open(done_file, "a") as f:
+            f.write(n + "\n")
+        print(f"[{n}] done in {time.time()-t:.0f}s", flush=True)
 
 
 if __name__ == "__main__":

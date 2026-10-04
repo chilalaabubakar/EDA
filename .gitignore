@@ -15,3 +15,5 @@ results/synthetic/
 # Hourly NASA POWER series: 8 MB each, regenerated in ~80 s by `pipeline.py resource`
 data/processed/resource_rwanda.csv
 data/processed/resource_kenya.csv
+# Pipeline resume markers (per results directory)
+results/.steps_done

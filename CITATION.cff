@@ -2,10 +2,10 @@ cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
 title: "eCooking mini-grid model: electric cooking, tariff structure and the mini-grid viability gap in Rwanda and Kenya"
 type: software
-# TO FILL before the Zenodo release: author names, ORCID, affiliation.
+# TO FILL before the Zenodo release: ORCID, affiliation.
 authors:
-  - family-names: "TO FILL"
-    given-names: "TO FILL"
+  - family-names: "Chilala"
+    given-names: "Abubakar"
     affiliation: "TO FILL"
     # orcid: "https://orcid.org/0000-0000-0000-0000"
 repository-code: "https://github.com/chilalaabubakar/EDA"

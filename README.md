@@ -17,7 +17,8 @@ Nkombo Island (Rwanda) and Ringiti Island (Kenya), 300-household archetypes.
 ## Quick start
 
 ```bash
-pip install -r requirements.txt            # pinned: RAMP 0.5.0 needs numpy<2
+uv venv --python 3.11 .venv && . .venv/bin/activate   # Python 3.11: pinned RAMP 0.5.0 stack
+uv pip install -r requirements.txt
 python -m pytest -q                        # ~1 min
 python src/pipeline.py all --synthetic --quick   # smoke run, no network
 ```

@@ -55,14 +55,14 @@ class Ctx:
         return self.params["countries"][site]["representative_year"]
 
     def resource(self, site, year=None):
-        from resource import load_site_resource, synthetic_years
+        from solar_resource import load_site_resource, synthetic_years
         y = year or self.rep_year(site)
         if self.synthetic:
             return synthetic_years(site)[y]
         return load_site_resource(site, y)
 
     def all_years(self, site):
-        from resource import resource_years, synthetic_years
+        from solar_resource import resource_years, synthetic_years
         return synthetic_years(site) if self.synthetic else resource_years(site)
 
     def cfg(self, site):

@@ -1,4 +1,6 @@
-# Pinned: rampdemand 0.5.0 needs numpy<2 and pandas<2.2.
+# Pinned: rampdemand 0.5.0 needs numpy<2 and pandas<2.2, so Python 3.11 (numpy
+# 1.26 and pandas 2.1 have no Python 3.13 wheels). Colab: see the v5 notebook,
+# which builds a Python 3.11 environment with uv.
 numpy==1.26.4
 pandas==2.1.4
 rampdemand==0.5.0

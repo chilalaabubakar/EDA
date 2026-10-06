@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 
 import final_cfg
-from resource import synthetic_years
+from solar_resource import synthetic_years
 from run_scenarios import make_load_builder
 from sizing import size_system
 

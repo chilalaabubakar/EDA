@@ -12,7 +12,7 @@ import pandas as pd
 
 import final_cfg
 import load_builder
-from resource import synthetic_years
+from solar_resource import synthetic_years
 from run_scenarios import make_load_builder, run, scenario_row
 
 RES = synthetic_years("rwanda")[2015]

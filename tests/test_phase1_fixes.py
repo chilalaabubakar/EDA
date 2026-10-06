@@ -216,7 +216,7 @@ def test_kenya_source_switch_is_resolved_at_call_time():
 # ------------------------------------- reliability constraint as s3.5 states
 def test_sized_systems_meet_the_constraint_in_every_year():
     """v4 accepted on lifetime-average unmet; year 20 ran at 7-12%."""
-    from resource import synthetic_years
+    from solar_resource import synthetic_years
     from run_scenarios import make_load_builder
     from sizing import size_system
     cfg = final_cfg.country_cfg("rwanda")

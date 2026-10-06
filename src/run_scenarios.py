@@ -161,7 +161,7 @@ def substitution_frontier(df):
 def main():
     import yaml
     from final_cfg import country_cfg
-    from resource import load_site_resource, synthetic_years
+    from solar_resource import load_site_resource, synthetic_years
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--params", default="params.yaml")

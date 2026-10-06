@@ -17,6 +17,7 @@ those into the manuscript tables, and tests/test_manuscript_numbers.py checks
 the .docx against them.
 """
 import argparse
+import os
 import subprocess
 import sys
 import time
@@ -24,6 +25,10 @@ from pathlib import Path
 
 import pandas as pd
 import yaml
+
+# Headless: never inherit a notebook's inline backend (Colab sets
+# MPLBACKEND=module://matplotlib_inline..., which this environment lacks).
+os.environ["MPLBACKEND"] = "Agg"
 
 SRC = Path(__file__).resolve().parent
 ROOT = SRC.parent

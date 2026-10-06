@@ -342,6 +342,14 @@ def s_household_cost(ctx):
 
 
 # --------------------------------------------------------------------- phase 4
+@step("final_tables", "phase4")
+def s_final_tables(ctx):
+    """Tables again, now that phases 2-3 exist: table 7 (operating subsidy)
+    and the ensemble numbers in headline_numbers.csv need their outputs, and
+    the phase 1 `tables` step runs before them."""
+    s_tables(ctx)
+
+
 @step("figures", "phase4")
 def s_figures(ctx):
     import figures

@@ -86,3 +86,13 @@ def test_resume_skips_finished_steps(tmp_path):
     again = subprocess.run(cmd + ["--resume"], cwd=ROOT, capture_output=True, text=True,
                            check=True)
     assert "already done, skipped" in again.stdout
+
+
+def test_tables_are_rebuilt_after_every_analysis():
+    """table7 and the ensemble numbers need phase 2-3 outputs, so `all` must
+    build the tables once more after the last analysis step."""
+    import pipeline
+    order = list(pipeline.STEPS)
+    assert "final_tables" in order
+    for needed in ("ensemble", "operating_subsidy", "household_cost"):
+        assert order.index(needed) < order.index("final_tables")

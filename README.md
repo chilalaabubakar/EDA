@@ -38,7 +38,7 @@ Python 3.11 is required, because RAMP 0.5.0 needs numpy 1.26. With
 ```bash
 uv venv --python 3.11 .venv && . .venv/bin/activate
 uv pip install -r requirements.txt
-python -m pytest -q                      # 128 tests, about 1 minute
+python -m pytest -q                      # 136 tests, about 1.5 minutes
 python src/pipeline.py all --synthetic --quick   # smoke run, no internet
 ```
 
@@ -75,16 +75,18 @@ resets. On a standard Colab machine the full run takes about 25 minutes.
 | phase1 | `tables` | `tables/table1..7.csv`, `tables.md`, `headline_numbers.csv` |
 | phase2 | `expansion` | `expansion.csv` (design years and staged expansion) |
 | phase2 | `sizing_check` | `sizing_check*.csv` (search against the full grid) |
-| phase2 | `interannual` | `interannual_*.csv` (20 weather years) |
+| phase2 | `interannual` | `interannual_*.csv` (20 weather years; the median-year design as comparison) |
 | phase2 | `ensemble` | `ensemble_*.csv` (24 random seeds) |
 | phase2 | `tou_sweep` | `tou_sweep.csv`, `tou_break_even.csv` |
 | phase2 | `esmap` | `esmap_waterfall.csv`, `lcoe_components.csv` |
 | phase3 | `operating_subsidy` | `operating_subsidy.csv` |
 | phase3 | `peaks` | `peak_and_curtailment.csv`, `curtailment.csv` |
 | phase3 | `household_bands` | `household_bands.csv` |
-| phase3 | `ringiti` | `ringiti_benchmark.csv` |
+| phase3 | `ringiti` | `ringiti_benchmark.csv` (model against the installed Ringiti plant) |
 | phase3 | `household_cost` | `household_cost.csv` |
-| phase3 | `kenya_check` | `kenya_ownership_check.csv` (Kenya under both survey ownership questions) |
+| phase3 | `daytime_share` | `cooking_daytime_share.csv` (cooking in the discount window, by φ) |
+| phase3 | `site_check` | `site_ownership_check.csv` (ownership scaled to the islands' census areas) |
+| phase3 | `kenya_check` | `kenya_ownership_check.csv` (Kenya under both survey ownership questions, and five more years of growth) |
 | phase4 | `final_tables` | tables again, once every analysis has run |
 | phase4 | `figures` | `figures/*.png`, `figures/*.pdf` |
 
@@ -122,7 +124,15 @@ table order), which is used in place of `manuscript/claims.yaml`.
 
 - **Weather:** NASA POWER hourly data for 2005 to 2024, in local solar time,
   downloaded by `src/fetch_power.py`. Only a yearly summary is committed
-  (`data/processed/resource_summary.csv`).
+  (`data/processed/resource_summary.csv`). Systems are sized and costed on
+  each site's design weather year (`design_year` in `params.yaml`: the year
+  hardest for the full-cooking system), so they meet the 5% unserved-demand
+  limit under all 20 weather years.
+- **Census checks:** Rwanda 2022 census (NISR) and Kenya 2019 census (KNBS)
+  appliance ownership for the islands' own areas, and the Kenya 2022 DHS,
+  are used only in the robustness checks (`src/site_ownership_check.py`,
+  `src/kenya_ownership_check.py`). The figures are typed into those files
+  with their table references.
 - **Household surveys:** World Bank Multi-Tier Framework surveys for Kenya
   2016 to 2018 (doi:10.48529/230v-e158, CC-BY 4.0) and Rwanda 2022
   (doi:10.48529/x75v-fm71). The Rwanda survey is licensed and is never
@@ -136,7 +146,7 @@ table order), which is used in place of `manuscript/claims.yaml`.
 
 ```
 src/            model, demand, sizing, finance, analyses, figures, pipeline
-tests/          128 automated tests (physics, finance, sizing, reproducibility)
+tests/          136 automated tests (physics, finance, sizing, reproducibility)
 params.yaml     run settings, sites, weather years
 data/processed/ aggregate survey statistics and the weather summary
 data/raw/       survey microdata and raw downloads (not committed)

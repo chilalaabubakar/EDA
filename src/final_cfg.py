@@ -191,10 +191,13 @@ COUNTRY_OVERRIDES = {
                       "bands":[(20, 89/RWF_USD),(50, 310/RWF_USD),(10**9, 369/RWF_USD)],
                       "telescopic":True},
             "appliances":APPLIANCES_RWANDA},
- # EPRA Schedule of Tariffs 2023 (2026-29 review withdrawn Jun 2026).
- # Non-telescopic since Apr 2023.
- "kenya":  {"tariff":{"flat_rate_per_kwh":16.45/KES_USD,
-                      "bands":[(30, 12.23/KES_USD),(100, 16.45/KES_USD),(10**9, 19.08/KES_USD)],
+ # EPRA Schedule of Tariffs 2023, Kenya Gazette Notice No. 3899 (special issue,
+ # 24 Mar 2023), Part II rates effective 1 July 2025: DC1 lifeline (<= 30 kWh)
+ # 12.14, DC2 (31-100) 16.50, DC3 (> 100) 18.57 KES/kWh energy charge. The
+ # 2026-29 review was withdrawn (Jun 2026). Non-telescopic since Apr 2023:
+ # monthly use selects one band and every unit pays that band's price.
+ "kenya":  {"tariff":{"flat_rate_per_kwh":16.50/KES_USD,
+                      "bands":[(30, 12.14/KES_USD),(100, 16.50/KES_USD),(10**9, 18.57/KES_USD)],
                       "telescopic":False},
             "appliances":APPLIANCES_KENYA},
 }

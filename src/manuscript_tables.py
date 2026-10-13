@@ -45,9 +45,9 @@ def table1():
     rb, kb = [b[0] for b in rw["bands"]], [b[0] for b in ke["bands"]]
     fmt = lambda v: f"{v:g}"
     return pd.DataFrame([
-        ["Lifeline", f"{fmt(r[0])} (0–{rb[0]} kWh)", f"{fmt(k[0])} (<{kb[0]} kWh)"],
-        ["Middle", f"{fmt(r[1])} ({rb[0]}–{rb[1]} kWh)", f"{fmt(k[1])} ({kb[0]+1}–{kb[1]} kWh)"],
-        ["Upper", f"{fmt(r[2])} (>{rb[1]} kWh)", f"{fmt(k[2])} (>{kb[1]} kWh)"],
+        ["Lifeline", f"{fmt(r[0])} (0–{rb[0]} kWh)", f"{k[0]:.2f} (≤{kb[0]} kWh)"],
+        ["Middle", f"{fmt(r[1])} ({rb[0]}–{rb[1]} kWh)", f"{k[1]:.2f} ({kb[0]+1}–{kb[1]} kWh)"],
+        ["Upper", f"{fmt(r[2])} (>{rb[1]} kWh)", f"{k[2]:.2f} (>{kb[1]} kWh)"],
         ["Structure", "Telescopic" if rw["telescopic"] else "Non-telescopic",
          "Telescopic" if ke["telescopic"] else "Non-telescopic"],
     ], columns=["Band", "Rwanda (RWF/kWh)", "Kenya (KES/kWh)"])
@@ -198,11 +198,42 @@ def phase_numbers(R):
         k = pd.read_csv(R / "kenya_ownership_check.csv").set_index("quantity")
         for q, r in k.iterrows():
             out[f"kenya_{q}_m3"], out[f"kenya_{q}_core"] = r["m3"], r["core"]
+            if "core_2022" in r:
+                out[f"kenya_{q}_core_2022"] = r["core_2022"]
     if (R / "operating_subsidy.csv").exists():
         o = pd.read_csv(R / "operating_subsidy.csv").set_index("site")
         for site in SITES:
             if site in o.index:
                 out[f"opsub_{site}"] = o.loc[site, "opsub_grant0_usd_per_conn_year"]
+    if (R / "interannual_summary.csv").exists():
+        for _, r in pd.read_csv(R / "interannual_summary.csv").iterrows():
+            for q, v in r.items():
+                if q != "site":
+                    out[f"weather_{q}_{r.site}"] = v
+    if (R / "site_ownership_check.csv").exists():
+        for _, r in pd.read_csv(R / "site_ownership_check.csv").iterrows():
+            out[f"site_{r.quantity}_national_{r.site}"] = r.national
+            out[f"site_{r.quantity}_island_{r.site}"] = r.island
+            out[f"site_{r.quantity}_change_pct_{r.site}"] = r.change_pct
+    if (R / "tou_break_even.csv").exists():
+        for _, r in pd.read_csv(R / "tou_break_even.csv").iterrows():
+            k = f"tou_break_even_cents_phi{int(round(10 * r.phi_nominal))}_{r.site}"
+            out[k] = 100 * r.break_even_discount if pd.notna(r.break_even_discount) else None
+    if (R / "cooking_daytime_share.csv").exists():
+        for _, r in pd.read_csv(R / "cooking_daytime_share.csv").iterrows():
+            out[f"daytime_share_pct_phi{int(round(10 * r.phi))}_{r.site}"] = \
+                100 * r.daytime_share_of_cooking_energy
+    if (R / "ringiti_benchmark.csv").exists():
+        g = pd.read_csv(R / "ringiti_benchmark.csv")
+        inst = g[g.basis.str.startswith("installed")]
+        if len(inst) and "max_solar_kwh_per_connection_year" in g:
+            i = inst.iloc[0]
+            out["ringiti_w_per_customer"] = i.w_per_connection
+            out["ringiti_max_kwh_per_customer"] = i.max_solar_kwh_per_connection_year
+            for _, r in g[g.basis.str.startswith("model")].iterrows():
+                pct = int(r.basis.split()[-1].rstrip("%"))
+                out[f"ringiti_pv_multiple_{pct}"] = r.pv_multiple_of_installed
+                out[f"ringiti_kwh_year1_{pct}"] = r.kwh_per_connection_year1
     return out
 
 

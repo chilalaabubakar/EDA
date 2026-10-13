@@ -85,11 +85,28 @@ def test_shifting_raises_coincident_peak():
 
 # ----------------------------------------------------------------- Ringiti
 def test_ringiti_benchmark_refuses_to_invent_the_installation():
+    """Without published figures the comparison says so instead of guessing."""
     import ringiti
-    assert ringiti.RINGITI_ACTUAL["source"] is None
+    blank = {k: None for k in ringiti.RINGITI_ACTUAL}
     df = ringiti.run(final_cfg.country_cfg("kenya"), synthetic_years("kenya")[2007],
-                     penetrations=(1.0,), sizing_kw=KW)
+                     actual=blank, penetrations=(1.0,), sizing_kw=KW)
     assert df.basis.str.contains("SOURCE NEEDED").any()
+
+
+def test_ringiti_benchmark_uses_only_published_figures():
+    import ringiti
+    a = ringiti.RINGITI_ACTUAL
+    assert a["source"] and a["pv_kw"] == 20.0 and a["connections"] == 140
+    assert a["battery_kwh"] is None and a["tariff_usd_per_kwh"] is None   # unpublished
+    df = ringiti.run(final_cfg.country_cfg("kenya"), synthetic_years("kenya")[2007],
+                     penetrations=(1.0,), sizing_kw=KW).set_index("basis")
+    inst = df.filter(like="installed", axis=0).iloc[0]
+    assert inst.w_per_connection == pytest.approx(1000 * 20 / 140)
+    # the most solar energy each customer could get, at the model's own yield
+    assert inst.max_solar_kwh_per_connection_year == pytest.approx(
+        20 * inst.ac_kwh_per_kw_year1 / 140)
+    model = df.loc["model, eCooking 100%"]
+    assert model.connections == 140 and model.pv_multiple_of_installed > 1
 
 
 # ---------------------------------------------------------- household cost
@@ -120,3 +137,25 @@ def test_kenya_check_headline_column_matches_published_results():
     D = pd.read_csv(R / "discount_sweep.csv")
     m = D[(D.site == "kenya") & (D.discount_rate == 0.12)].multiple_of_regulated.iloc[0]
     assert k["cost_reflective_multiple"] == pytest.approx(m, rel=1e-6)
+
+
+# ------------------------------------------- island census check and phi share
+def test_site_check_scales_only_census_items_and_caps_at_one():
+    import site_ownership_check as S
+    rw = final_cfg.country_cfg("rwanda")["appliances"]
+    out = S.scaled_appliances(rw, "rwanda")
+    r = S.ratios("rwanda")
+    assert out["tv_colour"][0] == pytest.approx(rw["tv_colour"][0] * r["television"])
+    assert out["mobile_charger"][0] == pytest.approx(min(1, rw["mobile_charger"][0] * r["mobile phone"]))
+    assert out["cfl_bulb"] == rw["cfl_bulb"]                    # not in the census
+    assert out["tv_colour"][1:] == rw["tv_colour"][1:]           # wattage and use unchanged
+    big = {"radio": (0.99, 10, 60, "all")}
+    assert S.scaled_appliances(big, "rwanda")["radio"][0] == 1.0
+    assert rw["tv_colour"][0] == final_cfg.APPLIANCES_RWANDA["tv_colour"][0]   # no mutation
+
+
+def test_daytime_share_of_cooking_rises_with_phi():
+    import cooking_shift
+    cfg = final_cfg.country_cfg("rwanda")
+    a, b, c = (cooking_shift.daytime_share(cfg, 60, phi) for phi in (0.0, 0.3, 0.5))
+    assert 0 < a < b < c < 1

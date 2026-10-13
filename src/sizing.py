@@ -27,6 +27,18 @@ WHAT CHANGED (Phases 1-2) AND WHY
      "pv"    v4 convention: pv_kw / dc_ac_ratio, battery output not limited.
      "load"  hybrid inverter rated to the design-year peak load x headroom,
              capping total AC output (PV + battery). DEFAULT.
+
+5. The fine window moves until the optimum is inside it. The coarse stage
+   ranks designs using the conservative end-of-life screen on a 100 kWh grid,
+   which over-sizes the battery at low PV and so biases the coarse optimum
+   towards larger PV. In the Kenya check (50% cooking, phi 0.5, ToU) the
+   coarse optimum was 260 kW, the fine window 235-285 kW, and the true
+   optimum 220 kW: the search stopped on the window edge, 1.3% above the
+   full-grid optimum. The window is now re-centred on the best design found
+   and searched again until that design is the best in its own window
+   (+/-25 kW of PV, -100/+200 kWh of battery). Re-centring only when the best
+   sits on an edge is not enough: 20 kWh battery steps make the cost surface
+   ripple, so the search can stop on a dip inside the window.
 """
 import numpy as np
 
@@ -35,7 +47,7 @@ from model import Battery, dispatch_year, simulate
 DEFAULTS = dict(max_unmet=0.05, pv_range=(10, 250), batt_range=(0, 800),
                 coarse_pv=25.0, coarse_batt=100.0, fine_pv=5.0, fine_batt=20.0,
                 design_year=None, reliability_metric="worst_year",
-                screen_battery_fade=1.0, extra_batt_steps=2)
+                screen_battery_fade=1.0, extra_batt_steps=2, max_recentre=8)
 
 
 def _res(resource, year):
@@ -132,27 +144,42 @@ def size_system(cfg, load_builder, resource, connections, verbose=False, **kw):
     _, pv0, bt0 = scored[0]
 
     # ---- stage 2: fine search around the coarse optimum, true LCOE ----------
-    trace, best, best_m = [], None, None
-    for pv in np.arange(max(pv_lo, pv0 - o["coarse_pv"]),
-                        pv0 + o["coarse_pv"] + 1e-9, o["fine_pv"]):
-        fine = np.arange(max(b_lo, bt0 - o["coarse_batt"]),
-                         min(b_hi, bt0 + 2 * o["coarse_batt"]) + 1e-9, o["fine_batt"])
-        found = 0
-        for bt in fine:
-            s, m = evaluate(pv, bt)
-            ok = _reliability(m, o["reliability_metric"], dy) <= o["max_unmet"]
-            trace.append({**s, "lcoe": m["lcoe"], "npv": m["npv"], "feasible": ok,
-                          "unmet_fraction": m["unmet_fraction"],
-                          "worst_year_unmet_fraction": m["worst_year_unmet_fraction"]})
-            if not ok:
-                continue
-            if best_m is None or m["lcoe"] < best_m["lcoe"]:
-                best, best_m = s, m
-            found += 1
-            if found > o["extra_batt_steps"]:
-                break                 # more battery at this PV only adds cost
+    # Re-centre on the best design until it is the best in its own window
+    # (point 5 above).
+    trace, best, best_m, logged = [], None, None, set()
+    pv_c, bt_c = pv0, bt0
+    for _ in range(o["max_recentre"] + 1):
+        pv_win = np.arange(max(pv_lo, pv_c - o["coarse_pv"]),
+                           min(pv_hi, pv_c + o["coarse_pv"]) + 1e-9, o["fine_pv"])
+        fine = np.arange(max(b_lo, bt_c - o["coarse_batt"]),
+                         min(b_hi, bt_c + 2 * o["coarse_batt"]) + 1e-9, o["fine_batt"])
+        for pv in pv_win:
+            found = 0
+            for bt in fine:
+                s, m = evaluate(pv, bt)
+                ok = _reliability(m, o["reliability_metric"], dy) <= o["max_unmet"]
+                key = (round(pv, 6), round(bt, 6))
+                if key not in logged:
+                    logged.add(key)
+                    trace.append({**s, "lcoe": m["lcoe"], "npv": m["npv"], "feasible": ok,
+                                  "unmet_fraction": m["unmet_fraction"],
+                                  "worst_year_unmet_fraction": m["worst_year_unmet_fraction"]})
+                if not ok:
+                    continue
+                if best_m is None or m["lcoe"] < best_m["lcoe"]:
+                    best, best_m = s, m
+                found += 1
+                if found > o["extra_batt_steps"]:
+                    break             # more battery at this PV only adds cost
+        if best is None:
+            break
+        pv_b, bt_b = best["pv_kw"], best["battery_kwh"]
+        if (pv_b, bt_b) == (pv_c, bt_c):
+            break                     # the centre is the best in its window
+        pv_c, bt_c = pv_b, bt_b
     if verbose:
-        print(f"  coarse opt pv={pv0} batt={bt0}; {len(trace)} fine evaluations")
+        print(f"  coarse opt pv={pv0} batt={bt0}; final window centre pv={pv_c} "
+              f"batt={bt_c}; {len(trace)} fine evaluations")
     return best, best_m, trace
 
 

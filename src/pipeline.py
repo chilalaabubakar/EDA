@@ -57,11 +57,17 @@ class Ctx:
         self.quick = args.quick
 
     def rep_year(self, site):
+        """Median-GHI weather year: the comparison design in the interannual step."""
         return self.params["countries"][site]["representative_year"]
+
+    def design_year(self, site):
+        """Weather year every system is sized and costed on (params.yaml)."""
+        c = self.params["countries"][site]
+        return c.get("design_year", c["representative_year"])
 
     def resource(self, site, year=None):
         from solar_resource import load_site_resource, synthetic_years
-        y = year or self.rep_year(site)
+        y = year or self.design_year(site)
         if self.synthetic:
             return synthetic_years(site)[y]
         return load_site_resource(site, y)
@@ -210,8 +216,8 @@ def s_interannual(ctx):
     summ, dist = [], []
     for site in ctx.sites:
         cfg, b, _, sizing = _headline(ctx, site)
-        s, d = interannual.run(cfg, sizing, b, ctx.all_years(site), ctx.rep_year(site),
-                               ctx.conn, _skw(ctx, cfg))
+        s, d = interannual.run(cfg, sizing, b, ctx.all_years(site), ctx.design_year(site),
+                               ctx.rep_year(site), ctx.conn, _skw(ctx, cfg))
         summ.append({"site": site, **s})
         dist.append(d.assign(site=site))
     pd.DataFrame(summ).to_csv(ctx.csv("interannual_summary.csv"), index=False,
@@ -339,6 +345,23 @@ def s_household_cost(ctx):
                                     r.kwh_full_ecooking - r.kwh_no_ecooking)
         rows.append(df.assign(site=site))
     pd.concat(rows).to_csv(ctx.csv("household_cost.csv"), index=False, float_format="%.10g")
+
+
+@step("daytime_share", "phase3")
+def s_daytime_share(ctx):
+    """Share of cooking energy in the discount window for each phi."""
+    import cooking_shift
+    cooking_shift.table({s: ctx.cfg(s) for s in ctx.sites}, ctx.n, seed=ctx.seed).to_csv(
+        ctx.csv("cooking_daytime_share.csv"), index=False, float_format="%.10g")
+
+
+@step("site_check", "phase3")
+def s_site_check(ctx):
+    """Headline numbers with ownership scaled to the islands' census areas."""
+    import site_ownership_check
+    site_ownership_check.compare({s: ctx.resource(s) for s in ctx.sites}, ctx.n, ctx.conn,
+                                 ctx.seed).to_csv(ctx.csv("site_ownership_check.csv"),
+                                                  index=False, float_format="%.10g")
 
 
 @step("kenya_check", "phase3")

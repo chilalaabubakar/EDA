@@ -1,5 +1,5 @@
-basis,connections,pv_kw,battery_kwh,inverter_kw,w_per_connection,kwh_storage_per_kwp,lcoe,kwh_per_connection_year1,regulated_tariff_model,tariff_installed
-"model, eCooking 0%",300,100,320,55,333.3333333,3.2,1.683372966,145.9452158,0.1275193798,
-"model, eCooking 50%",300,230,600,120,766.6666667,2.608695652,1.12827388,328.469327,0.1275193798,
-"model, eCooking 100%",300,345,920,175,1150,2.666666667,0.9632716024,511.1541047,0.1275193798,
-installed: SOURCE NEEDED - fill RINGITI_ACTUAL,,,,,,,,,0.1275193798,
+basis,connections,pv_kw,battery_kwh,inverter_kw,w_per_connection,kwh_storage_per_kwp,lcoe,kwh_per_connection_year1,kwh_per_connection_final_year,max_solar_kwh_per_connection_year,ac_kwh_per_kw_year1,pv_multiple_of_installed,regulated_tariff_model,tariff_installed
+"model, eCooking 0%",140,50,160,25,357.1428571,3.2,1.716864582,147.1834978,371.9253686,,1505.268357,2.5,0.1279069767,
+"model, eCooking 50%",140,110,300,60,785.7142857,2.727272727,1.156411174,330.2115931,834.4282497,,1505.268357,5.5,0.1279069767,
+"model, eCooking 100%",140,180,420,90,1285.714286,2.333333333,1.001923914,512.5515931,1295.192348,,1505.268357,9,0.1279069767,
+installed (TaiyangNews 2018; Renewvia Energy minigrid sites),140,20,,,142.8571429,,,,,215.0383367,1505.268357,1,0.1279069767,

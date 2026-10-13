@@ -90,10 +90,75 @@ def test_search_matches_full_grid_on_its_own_resolution(cfg, builder, headline):
 # ------------------------------------------------------- interannual variability
 def test_interannual_outputs(cfg, builder, headline):
     import interannual
-    summary, dist = interannual.run(cfg, headline[0], builder, YEARS, 2015, 300, KW)
+    summary, dist = interannual.run(cfg, headline[0], builder, YEARS, 2015, 2010, 300, KW)
     assert len(dist) == len(YEARS)
     assert summary["lcoe_p05"] <= summary["lcoe_median"] <= summary["lcoe_p95"]
     assert summary["ghi_spread_pct"] > 0
+    assert summary["design_year"] == 2015 and summary["median_year"] == 2010
+    assert summary["median_binding_year"] in YEARS
+
+
+def test_binding_year_is_the_year_with_most_unmet_demand():
+    import pandas as pd
+    import interannual
+    d = pd.DataFrame({"weather_year": [2005, 2006, 2007],
+                      "worst_year_unmet_fraction": [0.04, 0.07, 0.05]})
+    assert interannual.binding_year(d) == 2006
+
+
+def test_design_year_comes_from_params_with_median_fallback():
+    import types
+    from pipeline import Ctx
+    ctx = Ctx(types.SimpleNamespace(params="params.yaml", synthetic=True, results=None,
+                                    quick=True))
+    for site in ctx.sites:
+        assert ctx.design_year(site) in ctx.all_years(site)
+    c = ctx.params["countries"]["rwanda"]
+    ctx.params["countries"]["rwanda"] = {k: v for k, v in c.items() if k != "design_year"}
+    assert ctx.design_year("rwanda") == c["representative_year"]
+
+
+# ------------------------------------------------ the fine window keeps moving
+def test_search_result_is_a_local_optimum_in_pv(cfg, builder, headline):
+    """No neighbouring PV size, with any battery the fine grid allows, is
+    cheaper. Before the window re-centred, the Kenya check stopped on the
+    window edge 1.3% above the full-grid optimum."""
+    s, m = headline
+    for pv in (s["pv_kw"] - 5.0, s["pv_kw"] + 5.0):
+        bt = np.arange(max(0, s["battery_kwh"] - 100), s["battery_kwh"] + 200 + 1e-9, 20.0)
+        g, gm, _ = full_grid_search(cfg, builder, RES, 300, [pv], bt)
+        assert gm is None or m["lcoe"] <= gm["lcoe"] + 1e-9
+
+
+def test_window_recentres_when_the_coarse_optimum_is_off(cfg, monkeypatch):
+    """A cost surface with a known optimum and a coarse screen biased towards
+    large PV, as the end-of-life screen is in the Kenya check. Without
+    re-centring the search stops on the window edge; with it, it reaches the
+    full-grid optimum."""
+    import sizing
+
+    need = lambda pv: 100_000.0 / pv                       # battery for 5% unmet
+
+    def fake_sim(cfg, s, builder, res, tariff_mode="flat"):
+        u = 0.0 if s["battery_kwh"] >= need(s["pv_kw"]) - 1e-9 else 0.10
+        return None, {"lcoe": (s["pv_kw"] + 0.3 * s["battery_kwh"]) / 1000, "npv": 0.0,
+                      "unmet_fraction": u, "worst_year_unmet_fraction": u,
+                      "unmet_fraction_by_year": [u] * 20}
+
+    def biased_screen(cfg, s, builder, res, dy, fade=1.0):   # 2x too strict below 250 kW
+        k = 2.0 if s["pv_kw"] < 250 else 1.0
+        return 0.0 if s["battery_kwh"] >= k * need(s["pv_kw"]) else 0.10
+
+    monkeypatch.setattr(sizing, "simulate", fake_sim)
+    monkeypatch.setattr(sizing, "design_year_unmet", biased_screen)
+    monkeypatch.setattr(sizing, "inverter_for", lambda *a, **k: {})
+    kw = dict(pv_range=(10, 600), batt_range=(0, 2000))
+    _, stuck, _ = sizing.size_system(cfg, None, None, 300, max_recentre=0, **kw)
+    _, found, _ = sizing.size_system(cfg, None, None, 300, **kw)
+    _, grid, _ = sizing.full_grid_search(cfg, None, None, 300, np.arange(10, 600.1, 5.0),
+                                         np.arange(0, 2000.1, 20.0))
+    assert stuck["lcoe"] > grid["lcoe"] + 1e-6          # the old behaviour
+    assert found["lcoe"] == pytest.approx(grid["lcoe"])
 
 
 # ---------------------------------------------------------------- ensemble
@@ -139,3 +204,21 @@ def test_esmap_waterfall_moves_towards_benchmark(cfg, builder):
     import esmap
     wf = esmap.waterfall(cfg, builder, RES, 300, KW)
     assert wf.lcoe.is_monotonic_decreasing
+
+
+def test_published_designs_hold_in_every_weather_year():
+    """Sized on the design weather year, each headline system keeps unserved
+    demand within the limit in every project year under all 20 weather years;
+    the median-year design, kept as the comparison, does not."""
+    import pandas as pd
+    from pathlib import Path
+    R = Path(__file__).resolve().parents[1] / "results" / "interannual_summary.csv"
+    if not R.exists():
+        pytest.skip("run `python src/pipeline.py interannual`")
+    s = pd.read_csv(R)
+    if "design_year" not in s:
+        pytest.skip("interannual_summary.csv predates the design-year change")
+    assert (s.weather_years_breaching == 0).all()
+    assert (s.worst_year_unmet_max_over_weather <= 0.05 + 1e-12).all()
+    assert (s.median_weather_years_breaching > 0).all()
+    assert (s.median_lcoe < s.lcoe_design_year).all()

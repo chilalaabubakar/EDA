@@ -6,11 +6,17 @@ countries:
     latitude: -2.397
     longitude: 28.908
     representative_year: 2015     # median-GHI year 2005-2024 (load_resource.py)
+    # Design weather year: the year that is hardest for the full-cooking system
+    # (the median-year design leaves most demand unserved when it recurs; see
+    # interannual.binding_year). Systems sized on it keep unserved demand at or
+    # below 5% in every project year under all 20 weather years 2005-2024.
+    design_year: 2011
   kenya:
     site_name: Ringiti Island
     latitude: -0.465
     longitude: 33.972
     representative_year: 2007
+    design_year: 2022
 shared:
   resource:
     variables: [ALLSKY_SFC_SW_DWN, T2M, WS2M]

@@ -17,11 +17,34 @@ import operating_subsidy
 from run_scenarios import make_load_builder, run, substitution_frontier
 from viability import sizing_from_row
 
-SOURCES = {"m3": "M3 asset flags", "core": "core multi-select (headline)"}
+SOURCES = {"m3": "M3 asset flags", "core": "core multi-select (headline)",
+           "core_2022": "core, five more years of growth"}
+# The survey ran 2016-18; five years of the model's own 5% a year demand growth
+# brings it to 2022. Rural ownership did rise: television 26.9% (2019 census,
+# KNBS Vol. IV Table 2.36) to 38% (2022 KDHS summary report), radio 58.5% to 62%.
+SURVEY_AGE_YEARS = 5
+
+
+def _aged(cfg, years):
+    import copy
+    g = (1 + cfg["demand"]["annual_growth_rate"]) ** years
+    out = copy.deepcopy(cfg)
+    out["appliances"] = {k: (min(1.0, v[0] * g),) + tuple(v[1:])
+                         for k, v in cfg["appliances"].items()}
+    return out
 
 
 def headline(source, resource, n_households, connections, seed=42):
-    cfg = country_cfg("kenya", kenya_source=source)
+    if source == "core_2022":
+        cfg = _aged(country_cfg("kenya", kenya_source="core"), SURVEY_AGE_YEARS)
+    else:
+        cfg = country_cfg("kenya", kenya_source=source)
+    return headline_for(cfg, resource, n_households, connections, seed)
+
+
+def headline_for(cfg, resource, n_households, connections, seed=42):
+    """The headline numbers for any country config (also used by
+    site_ownership_check)."""
     S = run(cfg, resource, n_households, connections, seed=seed, verbose=False)
     flat = S[(S.tariff == "flat") & S.feasible].drop_duplicates("penetration") \
         .set_index("penetration").sort_index()
@@ -62,4 +85,5 @@ def compare(resource, n_households=300, connections=300, seed=42):
     df = pd.DataFrame(out)
     df.index.name = "quantity"
     df["change_pct"] = 100 * (df["core"] / df["m3"] - 1)
+    df["aged_change_pct"] = 100 * (df["core_2022"] / df["core"] - 1)
     return df.reset_index()

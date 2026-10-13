@@ -172,7 +172,7 @@ def main():
     args = ap.parse_args()
     p = yaml.safe_load(open(args.params))
     site = p["countries"][args.country]
-    year = site["representative_year"]
+    year = site.get("design_year", site["representative_year"])
     res = (synthetic_years(args.country)[year] if args.synthetic
            else load_site_resource(args.country, year))
     run(country_cfg(args.country), res, p["run"]["n_households"],

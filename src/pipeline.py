@@ -341,6 +341,16 @@ def s_household_cost(ctx):
     pd.concat(rows).to_csv(ctx.csv("household_cost.csv"), index=False, float_format="%.10g")
 
 
+@step("kenya_check", "phase3")
+def s_kenya_check(ctx):
+    """Kenya's headline numbers under both survey ownership questions."""
+    import kenya_ownership_check
+    if "kenya" not in ctx.sites:
+        return
+    kenya_ownership_check.compare(ctx.resource("kenya"), ctx.n, ctx.conn, ctx.seed).to_csv(
+        ctx.csv("kenya_ownership_check.csv"), index=False, float_format="%.10g")
+
+
 # --------------------------------------------------------------------- phase 4
 @step("final_tables", "phase4")
 def s_final_tables(ctx):

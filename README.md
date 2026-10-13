@@ -84,6 +84,7 @@ resets. On a standard Colab machine the full run takes about 25 minutes.
 | phase3 | `household_bands` | `household_bands.csv` |
 | phase3 | `ringiti` | `ringiti_benchmark.csv` |
 | phase3 | `household_cost` | `household_cost.csv` |
+| phase3 | `kenya_check` | `kenya_ownership_check.csv` (Kenya under both survey ownership questions) |
 | phase4 | `final_tables` | tables again, once every analysis has run |
 | phase4 | `figures` | `figures/*.png`, `figures/*.pdf` |
 

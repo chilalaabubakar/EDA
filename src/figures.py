@@ -262,9 +262,10 @@ def fig_tou_operator(T, out, phi=0.5):
 
 
 def fig_esmap(W, out):
-    """Cumulative LCOE bridge from the headline to benchmark-like conventions."""
+    """Cumulative LCOE bridge: three assumptions changed in turn (10% discount
+    rate, no reserve for demand growth, twice the demand per connection)."""
     steps = ["This\nstudy", "Discount\nrate 10%", "No growth\nreserve",
-             "Demand\nx2", "Bench-\nmark"]
+             "Demand\nx2", "All\nthree"]
     fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.2), sharey=True)
     edge = dict(edgecolor="black", linewidth=1.0, width=0.64)
     for ax, site, col in zip(axes, SITE, SERIES):

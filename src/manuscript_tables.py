@@ -194,6 +194,10 @@ def phase_numbers(R):
         for _, r in e.iterrows():
             k = f"ens_{r.quantity}_{r.site}"
             out[k], out[k + "_lo"], out[k + "_hi"] = r["mean"], r.ci95_lo, r.ci95_hi
+    if (R / "kenya_ownership_check.csv").exists():
+        k = pd.read_csv(R / "kenya_ownership_check.csv").set_index("quantity")
+        for q, r in k.iterrows():
+            out[f"kenya_{q}_m3"], out[f"kenya_{q}_core"] = r["m3"], r["core"]
     if (R / "operating_subsidy.csv").exists():
         o = pd.read_csv(R / "operating_subsidy.csv").set_index("site")
         for site in SITES:

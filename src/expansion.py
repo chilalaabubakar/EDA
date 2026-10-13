@@ -22,13 +22,13 @@ import copy
 import numpy as np
 import pandas as pd
 
-from model import required_tariff, simulate
+from model import average_billed_rate, required_tariff, simulate
 from sizing import _sizing, design_year_unmet, size_system
 
 
 def _multiple(cfg, sizing, builder, res):
     tar, _ = required_tariff(cfg, sizing, builder, res)
-    return (tar, tar / cfg["tariff"]["flat_rate_per_kwh"]) if tar else (None, None)
+    return (tar, tar / average_billed_rate(cfg, sizing, builder, res)) if tar else (None, None)
 
 
 def _row(label, cfg, sizing, builder, res, extra=None):

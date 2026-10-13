@@ -14,7 +14,7 @@ s4 reports 7.4% (Nkombo) and 8.0% (Ringiti) interannual GHI spreads over
 import numpy as np
 import pandas as pd
 
-from model import required_tariff, simulate
+from model import average_billed_rate, required_tariff, simulate
 from sizing import size_system
 
 
@@ -58,7 +58,8 @@ def run(cfg, sizing, builder, years, rep_year, connections, sizing_kw=None):
     chrono = chronological(cfg, sizing, builder, years)
     p10y, s10, m10, tar10 = size_to_percentile(cfg, builder, years, connections,
                                                sizing_kw=sizing_kw)
-    reg = cfg["tariff"]["flat_rate_per_kwh"]
+    reg = average_billed_rate(cfg, sizing, builder, years[rep_year])
+    reg10 = average_billed_rate(cfg, s10, builder, years[p10y])
     _, base = simulate(cfg, sizing, builder, years[rep_year])
     tar0, _ = required_tariff(cfg, sizing, builder, years[rep_year])
     summary = {
@@ -77,6 +78,6 @@ def run(cfg, sizing, builder, years, rep_year, connections, sizing_kw=None):
         "p10_year": p10y, "p10_pv_kw": s10["pv_kw"], "p10_battery_kwh": s10["battery_kwh"],
         "p10_lcoe": m10["lcoe"],
         "multiple_rep_year": tar0 / reg if tar0 else None,
-        "multiple_p10_sizing": tar10 / reg if tar10 else None,
+        "multiple_p10_sizing": tar10 / reg10 if tar10 else None,
     }
     return summary, dist

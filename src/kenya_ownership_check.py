@@ -1,10 +1,10 @@
 """Robustness: Kenya's headline results under the two ownership questions.
 
 The Kenya MTF survey records appliance ownership twice for the same rural,
-grid-connected households (n = 521): the M3 asset flags (headline) and the
+grid-connected households (n = 521): the M3 asset flags and the
 core multi-select m_m_3_group, which reports 3 to 10 times higher ownership
-(src/mtf_checks.py). This reruns the Kenyan headline numbers with each and
-writes them side by side.
+(src/mtf_checks.py). The headline uses the core question; this reruns the
+Kenyan headline numbers with each and writes them side by side.
 
     python src/pipeline.py kenya_check     ->  results/kenya_ownership_check.csv
 """
@@ -12,12 +12,12 @@ import pandas as pd
 
 from bands import _band_rate, monthly_kwh_per_household
 from final_cfg import country_cfg
-from model import required_tariff
+from model import average_billed_rate, required_tariff
 import operating_subsidy
 from run_scenarios import make_load_builder, run, substitution_frontier
 from viability import sizing_from_row
 
-SOURCES = {"m3": "M3 asset flags (headline)", "core": "core multi-select"}
+SOURCES = {"m3": "M3 asset flags", "core": "core multi-select (headline)"}
 
 
 def headline(source, resource, n_households, connections, seed=42):
@@ -34,7 +34,7 @@ def headline(source, resource, n_households, connections, seed=42):
     b1 = make_load_builder(cfg, n_households, pen, 0.0, seed)
     b0 = make_load_builder(cfg, n_households, 0.0, 0.0, seed)
     tar, _ = required_tariff(cfg, sizing, b1, resource)
-    reg = cfg["tariff"]["flat_rate_per_kwh"]
+    reg = average_billed_rate(cfg, sizing, b1, resource)
     sub = operating_subsidy.cost(cfg, sizing, b1, resource, n_households)
     t = cfg["tariff"]
     kwh0 = monthly_kwh_per_household(b0, 1, n_households)

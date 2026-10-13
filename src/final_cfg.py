@@ -127,7 +127,11 @@ APPLIANCES_KENYA_CORE = {
     "tv_bw":              (0.0083, 40, 240, "18:00-23:00"),
 }
 APPLIANCES_KENYA_CORE_PROVENANCE = "MTF core m_m_3_group, rural+grid, pw_final, all-household denominator"
-KENYA_OWNERSHIP_SOURCE = "m3"        # "m3" (headline, as published) | "core"
+# HEADLINE = core multi-select. The M3 flags put phone-charger ownership among
+# rural grid-connected Kenyan households at 3.9% (Rwanda: 71.5%) and are close
+# to a strict subset of the multi-select, so they undercount ownership. The M3
+# run is kept as a robustness check (src/kenya_ownership_check.py).
+KENYA_OWNERSHIP_SOURCE = "core"      # "core" (headline) | "m3" (robustness)
 
 # MTF RWA_2022 SECTION_EF1, rural (HI04=2) AND grid-connected (C002=1),
 # non-refugee, weighted by HH_WT. n = 1,115 households.
@@ -178,6 +182,10 @@ APPLIANCES_RWANDA_MEASURED = {
 }
 
 COUNTRY_OVERRIDES = {
+ # flat_rate_per_kwh is NOT the reference for cost-reflective multiples: those
+ # divide by model.average_billed_rate (what households actually pay under the
+ # bands, present-value weighted). It is only a starting value for the
+ # flat-tariff solver and the reference line in fig6.
  # RURA, effective 1 Oct 2025. Telescopic bands.
  "rwanda": {"tariff":{"flat_rate_per_kwh":214/RWF_USD,
                       "bands":[(20, 89/RWF_USD),(50, 310/RWF_USD),(10**9, 369/RWF_USD)],

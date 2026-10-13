@@ -105,14 +105,14 @@ def test_household_cost_includes_appliance_and_band_effect():
 
 
 def test_kenya_check_headline_column_matches_published_results():
-    """kenya_ownership_check's "m3" column is the published Kenyan headline;
+    """kenya_ownership_check's "core" column is the published Kenyan headline;
     if it drifts, the robustness comparison in s4.5 is against the wrong base."""
     import pandas as pd
     from pathlib import Path
     R = Path(__file__).resolve().parents[1] / "results"
     if not (R / "kenya_ownership_check.csv").exists():
         pytest.skip("run `python src/pipeline.py kenya_check`")
-    k = pd.read_csv(R / "kenya_ownership_check.csv").set_index("quantity")["m3"]
+    k = pd.read_csv(R / "kenya_ownership_check.csv").set_index("quantity")["core"]
     S = pd.read_csv(R / "scenarios_both.csv")
     flat = S[(S.site == "kenya") & (S.tariff == "flat") & S.feasible].sort_values("penetration")
     assert k["lcoe_no_cooking"] == pytest.approx(flat.lcoe.iloc[0], rel=1e-9)

@@ -552,6 +552,21 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
     return df, metrics
 
 
+def average_billed_rate(cfg, sizing, load_builder, resource, tariff_mode="flat"):
+    """Average price per kWh billed to households under the regulated tariff,
+    weighted by present value over the project (before collection losses).
+
+    This is the reference for cost-reflective multiples. Under banded tariffs
+    the price paid depends on how much households use, and cooking pushes use
+    up through the bands, so no single band rate represents what households
+    pay; the average is computed from the simulated consumption instead.
+    """
+    df, _ = simulate(cfg, sizing, load_builder, resource, tariff_mode)
+    disc = (1 + cfg["finance"]["discount_rate_real"]) ** df.year.values
+    coll = cfg["tariff"]["collection_rate"]
+    return float((df.revenue / disc).sum() / coll / (df.served_kwh / disc).sum())
+
+
 def _copy_cfg(cfg):
     return {k: (v.copy() if isinstance(v, dict) else v) for k, v in cfg.items()}
 

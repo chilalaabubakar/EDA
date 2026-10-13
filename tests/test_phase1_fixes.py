@@ -127,8 +127,11 @@ def test_both_countries_have_their_own_mtf_appliance_set():
     ke = final_cfg.country_cfg("kenya")["appliances"]
     assert rw and ke and rw != ke
     assert rw is not ke
-    # Rwanda's stock is materially heavier - the finding that reverses s3.2.
-    assert rw["mobile_charger"][0] > 5 * ke["mobile_charger"][0]
+    # Phone chargers: Rwanda 71.5%; Kenya 19.6% on the headline (core) question
+    # and 3.9% on the M3 flags, which is why M3 is only a robustness check.
+    assert rw["mobile_charger"][0] > 3 * ke["mobile_charger"][0]
+    m3 = final_cfg.country_cfg("kenya", kenya_source="m3")["appliances"]
+    assert ke["mobile_charger"][0] > 4 * m3["mobile_charger"][0]
 
 
 def test_config_still_refuses_a_missing_appliance_set(monkeypatch):
@@ -146,7 +149,7 @@ def test_config_refuses_a_shared_appliance_object(monkeypatch):
 
 def test_kenya_country_config_builds():
     cfg = final_cfg.country_cfg("kenya")
-    assert cfg["appliances"] is final_cfg.APPLIANCES_KENYA
+    assert cfg["appliances"] is final_cfg.APPLIANCES_KENYA_CORE   # headline source
     assert cfg["tariff"]["telescopic"] is False
 
 

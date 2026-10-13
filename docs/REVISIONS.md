@@ -1,6 +1,33 @@
 # Revision plan: status, findings, and manuscript changes
 
-## Real results — first full run (NASA POWER 2005–2024, 2 Oct 2026)
+## Current results (13 Oct 2026)
+
+Two decisions changed the headline since the first full run below:
+
+* **Kenya ownership source is now the core question** (`m_m_3_group`,
+  `KENYA_OWNERSHIP_SOURCE = "core"`). M3 puts phone chargers at 3.9% against
+  Rwanda's 71.5% and is close to a strict subset of the core question; it is
+  kept as a robustness run (`pipeline.py kenya_check`).
+* **Cost-reflective multiples use the average price households actually pay**
+  (`model.average_billed_rate`: billed revenue over served kWh, both weighted
+  by present value) instead of one flat rate, because no single band of a
+  banded tariff shows what a cooking household pays.
+
+| Claim | Rwanda | Kenya |
+|---|---|---|
+| LCOE 0 → 100% eCooking | $2.64 → $1.05 (−60%) | $1.68 → $0.96 (−43%) |
+| kWh per household a month, no cooking | 6 | 12 (M3: 2) |
+| Avoided storage, φ = 0.5 (24 seeds) | 21% (20–22) | 25% (24–25) |
+| ToU LCOE reduction (24 seeds) | 5.0% (4.8–5.2) | 7.0% (6.9–7.2) |
+| Curtailment, 100% eCooking | 48% | 49% |
+| Average billed price, 12% discount rate | $0.157/kWh | $0.128/kWh |
+| Cost-reflective multiple, 12% / 20% | 8.8× / 13.3× | 9.9× / 14.4× |
+| Staged expansion multiple | 6.7× | 7.6× |
+| Operating subsidy, no grant | $485 per connection·yr | $520 per connection·yr |
+| Sizing search vs full grid | identical | +1.3% (Kenya, φ = 0.5, ToU) |
+| Kenya under M3 instead | | fall 83%, multiple 10.6×, subsidy $430 |
+
+## First full run (NASA POWER 2005–2024, 2 Oct 2026)
 
 `python src/pipeline.py all`, headline Kenya ownership source = M3 (as
 published). All tables: `results/tables/tables.md`. Against the current
@@ -91,9 +118,10 @@ compares bytes; `test_identical_scenarios_identical_lcoe_to_four_decimals`).
    listing a mobile charger in the multi-select, 271 are "Yes" in M3. Rural
    grid-connected, weighted: colour TV 34.8% vs 9.6%, radio 39.3% vs 6.8%,
    bulb 25.6% vs 8.3%. Check Section M of the questionnaire to decide which is
-   *ownership*. Switch: `final_cfg.KENYA_OWNERSHIP_SOURCE = "core"`. Until
-   then the headline keeps M3 (as published) — and v4's claim that Rwanda's
-   appliance stock is 2.9× Kenya's may be an artefact of M3.
+   *ownership*. **Decided:** the headline uses the core question
+   (`final_cfg.KENYA_OWNERSHIP_SOURCE = "core"`); M3 is the robustness run.
+   v4's claim that Rwanda's appliance stock is 2.9× Kenya's was an artefact
+   of M3.
    Detail: `data/processed/appliance_ownership_kenya_sources.csv`.
 4. **§6.6 firewood sentence is probably right after all.** v4 concluded fuel
    codes 2 and 3 were different fuels. The microdata say otherwise: code 3 has
@@ -270,7 +298,7 @@ IPCC (2006) if the CO₂ figures are reported.
 
 ## Open decisions (🔶), in priority order
 
-1. Kenyan ownership source: M3 flags vs core multi-select (questionnaire §M).
+1. ~~Kenyan ownership source~~: resolved, core multi-select (M3 as robustness).
 2. Run `pipeline.py all` on real NASA POWER data and paste the regenerated
    tables; then `manuscript_check.py` must report 0 mismatches.
 3. Ringiti installed-system figures and source.

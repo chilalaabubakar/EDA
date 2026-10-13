@@ -7,7 +7,7 @@ sweep found for each country at full eCooking penetration, flat tariff.
 import pandas as pd
 
 from final_cfg import DISCOUNT_RATES, country_cfg
-from model import required_subsidy, required_tariff, simulate
+from model import average_billed_rate, required_subsidy, required_tariff, simulate
 from run_scenarios import make_load_builder
 
 
@@ -39,7 +39,7 @@ def viability(scenarios, resources, n_households, connections, seed=42):
         _, m = simulate(cfg, sizing, builder, res, "flat")
         frac, best_irr = required_subsidy(cfg, sizing, builder, res, "flat")
         tar, _ = required_tariff(cfg, sizing, builder, res)
-        reg = cfg["tariff"]["flat_rate_per_kwh"]
+        reg = average_billed_rate(cfg, sizing, builder, res)
         rows.append({"site": site, "penetration": pen,
                      "regulated_tariff": reg,
                      "lcoe": m["lcoe"], "npv": m["npv"],
@@ -72,10 +72,10 @@ def discount_sweep(scenarios, resources, n_households, connections, seed=42,
                             "target_irr": dr + hurdle_premium}
             _, m = simulate(c, sizing, builder, res, "flat")
             tar, _ = required_tariff(c, sizing, builder, res)
-            reg = c["tariff"]["flat_rate_per_kwh"]
+            reg = average_billed_rate(c, sizing, builder, res)
             rows.append({"site": site, "discount_rate": dr,
                          "target_irr": dr + hurdle_premium,
                          "lcoe": m["lcoe"], "npv": m["npv"],
-                         "cost_reflective_tariff": tar,
+                         "cost_reflective_tariff": tar, "regulated_tariff": reg,
                          "multiple_of_regulated": tar / reg if tar else None})
     return pd.DataFrame(rows)

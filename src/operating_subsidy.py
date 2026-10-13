@@ -57,9 +57,10 @@ def cost(cfg, sizing, builder, res, villages_households=300,
     r = cfg["finance"]["discount_rate_real"]
     life = cfg["finance"]["project_life_years"]
     df, m = simulate(cfg, sizing, builder, res)
-    reg = cfg["tariff"]["flat_rate_per_kwh"]
     tar, _ = required_tariff(cfg, sizing, builder, res)
     disc = (1 + r) ** df.year.values
+    reg = float((df.revenue / disc).sum() / cfg["tariff"]["collection_rate"]
+                / (df.served_kwh / disc).sum())   # = model.average_billed_rate
     out = {"lcoe": m["lcoe"], "regulated_tariff": reg, "cost_reflective_tariff": tar,
            "gap_per_kwh": (tar - reg) if tar else None,
            "served_kwh_year1": float(df.served_kwh.iloc[0]),

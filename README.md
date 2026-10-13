@@ -38,7 +38,7 @@ Python 3.11 is required, because RAMP 0.5.0 needs numpy 1.26. With
 ```bash
 uv venv --python 3.11 .venv && . .venv/bin/activate
 uv pip install -r requirements.txt
-python -m pytest -q                      # 127 tests, about 1 minute
+python -m pytest -q                      # 128 tests, about 1 minute
 python src/pipeline.py all --synthetic --quick   # smoke run, no internet
 ```
 
@@ -136,7 +136,7 @@ table order), which is used in place of `manuscript/claims.yaml`.
 
 ```
 src/            model, demand, sizing, finance, analyses, figures, pipeline
-tests/          127 automated tests (physics, finance, sizing, reproducibility)
+tests/          128 automated tests (physics, finance, sizing, reproducibility)
 params.yaml     run settings, sites, weather years
 data/processed/ aggregate survey statistics and the weather summary
 data/raw/       survey microdata and raw downloads (not committed)

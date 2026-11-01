@@ -234,6 +234,32 @@ def phase_numbers(R):
                 pct = int(r.basis.split()[-1].rstrip("%"))
                 out[f"ringiti_pv_multiple_{pct}"] = r.pv_multiple_of_installed
                 out[f"ringiti_kwh_year1_{pct}"] = r.kwh_per_connection_year1
+    if (R / "cost_vs_price.csv").exists():
+        cp = pd.read_csv(R / "cost_vs_price.csv")
+        for site, g in cp.groupby("site"):
+            g = g.set_index("penetration").sort_index()
+            for pen, r in g.iterrows():
+                p = int(round(100 * pen))
+                for q in ("kwh_per_connection_year1", "gross_capex", "battery_kwh",
+                          "per_connection_fixed", "supply", "avg_price_paid",
+                          "lcoe_over_price", "gap_per_kwh", "npv"):
+                    out[f"cvp_{q}_{p}_{site}"] = r[q]
+                out[f"cvp_gross_capex_musd_{p}_{site}"] = r.gross_capex / 1e6
+                out[f"cvp_npv_musd_{p}_{site}"] = r.npv / 1e6
+            lo, hi = g.iloc[0], g.iloc[-1]          # no cooking, full cooking
+            out[f"cvp_energy_ratio_{site}"] = (hi.kwh_per_connection_year1
+                                               / lo.kwh_per_connection_year1)
+            out[f"cvp_capex_ratio_{site}"] = hi.gross_capex / lo.gross_capex
+            out[f"cvp_battery_ratio_{site}"] = hi.battery_kwh / lo.battery_kwh
+            out[f"cvp_fixed_share_of_fall_pct_{site}"] = (
+                100 * (lo.per_connection_fixed - hi.per_connection_fixed) / (lo.lcoe - hi.lcoe))
+            out[f"cvp_cost_factor_{site}"] = lo.lcoe / hi.lcoe
+            out[f"cvp_price_factor_{site}"] = hi.avg_price_paid / lo.avg_price_paid
+    if (R / "bill_example.csv").exists():
+        for _, r in pd.read_csv(R / "bill_example.csv").iterrows():
+            for q, v in r.items():
+                if q not in ("site", "currency"):
+                    out[f"bill_{q}_{r.site}"] = v
     return out
 
 

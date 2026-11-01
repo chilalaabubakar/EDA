@@ -326,6 +326,28 @@ def s_household_bands(ctx):
                              float_format="%.10g")
 
 
+@step("cost_vs_price", "phase3")
+def s_cost_vs_price(ctx):
+    """Why cost per kWh falls while the price paid per kWh rises (Fig. 2)."""
+    import cost_vs_price as CP
+    S = ctx.read("scenarios_both.csv")
+    rows, bills = [], []
+    for site in ctx.sites:
+        cfg = ctx.cfg(site)
+        pens = sorted(S[(S.site == site) & S.feasible & (S.tariff == "flat")
+                        & S.penetration.isin([0.0, 0.5, 1.0])].penetration.unique())
+        rows.append(CP.run(cfg, site, S, ctx.resource(site), ctx.n, ctx.conn,
+                           ctx.seed, pens))
+        if (ctx.results / "household_bands.csv").exists():
+            h = ctx.read("household_bands.csv")
+            h = h[(h.site == site) & (h.year == 1)].set_index("penetration").mean_kwh_month
+            bills.append(CP.bill_example(cfg, site, float(h.loc[0.0]), float(h.loc[1.0])))
+    pd.concat(rows).to_csv(ctx.csv("cost_vs_price.csv"), index=False, float_format="%.10g")
+    if bills:
+        pd.DataFrame(bills).to_csv(ctx.csv("bill_example.csv"), index=False,
+                                   float_format="%.10g")
+
+
 @step("ringiti", "phase3")
 def s_ringiti(ctx):
     import ringiti

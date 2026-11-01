@@ -48,3 +48,13 @@ rate.** Cost-reflective tariff (US$/kWh, logarithmic scale) at which the
 project IRR equals the discount rate plus three percentage points, full
 eCooking penetration, flat tariff, no capital grant; dotted lines are the
 regulated residential rates. Source: `results/discount_sweep.csv`.
+
+**Cost and price per kWh by share of households cooking
+(`fig_cost_vs_price`).** (a) LCOE (US$/kWh, real, 12% discount rate) at 0, 50
+and 100% eCooking penetration, split into per-connection costs (the
+connection, its share of soft costs, and operation), which do not change with
+use, and the cost of PV, battery and inverter with their soft costs and
+battery replacement. (b) Average price paid per kWh under the regulated
+tariff, weighted by present value, for the same scenarios; labels give the
+LCOE as a multiple of that price. Least-cost flat-tariff sizing, 300
+households, design weather year. Source: `results/cost_vs_price.csv`.

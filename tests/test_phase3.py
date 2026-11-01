@@ -159,3 +159,45 @@ def test_daytime_share_of_cooking_rises_with_phi():
     cfg = final_cfg.country_cfg("rwanda")
     a, b, c = (cooking_shift.daytime_share(cfg, 60, phi) for phi in (0.0, 0.3, 0.5))
     assert 0 < a < b < c < 1
+
+
+# ------------------------------------------------------- cost versus price
+def test_cost_vs_price_splits_lcoe_and_prices_bands(setup):
+    """Per-connection and supply costs add up to the LCOE, and the average
+    price paid is a band rate between the lifeline and top rates."""
+    import pandas as pd
+    import cost_vs_price as CP
+    cfg, _, s, m = setup
+    S = pd.DataFrame([{"site": "rwanda", "penetration": 1.0, "tariff": "flat",
+                       "feasible": True, "pv_kw": s["pv_kw"],
+                       "battery_kwh": s["battery_kwh"],
+                       "inverter_kw": s.get("inverter_kw", 0.0),
+                       "inverter_limits_battery": bool(s.get("inverter_limits_battery"))}])
+    r = CP.run(cfg, "rwanda", S, RES, 300, 300, 42, (1.0,)).iloc[0]
+    assert r.per_connection_fixed + r.supply == pytest.approx(r.lcoe, rel=1e-9)
+    assert r.lcoe == pytest.approx(m["lcoe"], rel=1e-9)
+    bands = cfg["tariff"]["bands"]
+    assert bands[0][1] <= r.avg_price_paid <= bands[-1][1]
+    assert r.lcoe_over_price == pytest.approx(r.lcoe / r.avg_price_paid)
+
+
+def test_bill_example_rwanda_blocks_are_telescopic():
+    """6 kWh is all lifeline; at 36 kWh only the units above 20 kWh pay the
+    second block, so the bill is 20 x lifeline + 16 x second block."""
+    import cost_vs_price as CP
+    cfg = final_cfg.country_cfg("rwanda")
+    (u1, r1), (u2, r2) = cfg["tariff"]["bands"][:2]
+    b = CP.bill_example(cfg, "rwanda", 6.0, 36.0)
+    assert b["bill_no_cooking_usd"] == pytest.approx(6 * r1)
+    assert b["bill_cooking_usd"] == pytest.approx(u1 * r1 + (36 - u1) * r2)
+    assert b["marginal_rate_cooking_usd"] == pytest.approx(r2)
+    assert b["bill_ratio"] == pytest.approx(b["energy_ratio"] * b["price_ratio"])
+
+
+def test_bill_example_kenya_band_reprices_every_unit():
+    import cost_vs_price as CP
+    cfg = final_cfg.country_cfg("kenya")
+    (u1, r1), (u2, r2) = cfg["tariff"]["bands"][:2]
+    b = CP.bill_example(cfg, "kenya", 12.0, 42.0)
+    assert b["bill_no_cooking_usd"] == pytest.approx(12 * r1)
+    assert b["bill_cooking_usd"] == pytest.approx(42 * r2)      # all units at band 2

@@ -38,7 +38,7 @@ Python 3.11 is required, because RAMP 0.5.0 needs numpy 1.26. With
 ```bash
 uv venv --python 3.11 .venv && . .venv/bin/activate
 uv pip install -r requirements.txt
-python -m pytest -q                      # 136 tests, about 1.5 minutes
+python -m pytest -q                      # 139 tests, about 1.5 minutes
 python src/pipeline.py all --synthetic --quick   # smoke run, no internet
 ```
 
@@ -82,6 +82,7 @@ resets. On a standard Colab machine the full run takes about 25 minutes.
 | phase3 | `operating_subsidy` | `operating_subsidy.csv` |
 | phase3 | `peaks` | `peak_and_curtailment.csv`, `curtailment.csv` |
 | phase3 | `household_bands` | `household_bands.csv` |
+| phase3 | `cost_vs_price` | `cost_vs_price.csv`, `bill_example.csv` (why cost per kWh falls while the price paid per kWh rises) |
 | phase3 | `ringiti` | `ringiti_benchmark.csv` (model against the installed Ringiti plant) |
 | phase3 | `household_cost` | `household_cost.csv` |
 | phase3 | `daytime_share` | `cooking_daytime_share.csv` (cooking in the discount window, by φ) |
@@ -101,9 +102,10 @@ resets. On a standard Colab machine the full run takes about 25 minutes.
 | Table 5, cost-reflective tariff | `tables/table6.csv` |
 | Table 6, operating subsidy | `tables/table7.csv` |
 | Fig. 1, model structure | `figures/fig1_model_structure.*` |
-| Fig. 2, cost compared with ESMAP | `figures/fig_esmap.*` |
-| Fig. 3, daytime discount | `figures/fig_tou_operator.*` |
-| Fig. 4, price per unit by use | `figures/fig5_blended_tariff.*` |
+| Fig. 2, cost and price per kWh by share cooking | `figures/fig_cost_vs_price.*` |
+| Fig. 3, cost compared with ESMAP | `figures/fig_esmap.*` |
+| Fig. 4, daytime discount | `figures/fig_tou_operator.*` |
+| Fig. 5, price per unit by use | `figures/fig5_blended_tariff.*` |
 | Abstract and text numbers | `tables/headline_numbers.csv` and the CSVs above |
 
 Captions for every figure file are in `figures/captions.md`.

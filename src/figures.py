@@ -298,9 +298,64 @@ def fig_esmap(W, out):
     save(fig, out, "fig_esmap")
 
 
+def fig_cost_vs_price(CP, out):
+    """(a) LCOE split into per-connection costs and solar, battery and inverter,
+    by share of households cooking; (b) average price paid per kWh, labelled
+    with the LCOE as a multiple of that price. Source: cost_vs_price.csv."""
+    from matplotlib.patches import Patch
+    pens = sorted(CP.penetration.unique())
+    lab = [f"{p:.0%}" for p in pens]
+    fig, (a, b) = plt.subplots(1, 2, figsize=(7.2, 2.9),
+                               gridspec_kw={"width_ratios": [1.25, 1]})
+    edge = dict(edgecolor="black", linewidth=0.8)
+    w = 0.38
+    for i, (site, col) in enumerate(zip(SITE, SERIES)):
+        c = CP[CP.site == site].set_index("penetration").loc[pens]
+        x = np.arange(len(pens)) + (i - 0.5) * (w + 0.04)
+        a.bar(x, c.per_connection_fixed, w, color=PALETTE["neutral"], hatch="///", **edge)
+        a.bar(x, c.supply, w, bottom=c.per_connection_fixed, color=col, **edge)
+        for xi, tot in zip(x, c.lcoe):
+            a.annotate(f"{tot:.2f}", (xi, tot), xytext=(0, 2), textcoords="offset points",
+                       ha="center", fontsize=8, fontweight="bold", color=col)
+    a.set_xticks(np.arange(len(pens)))
+    a.set_xticklabels(lab)
+    a.set_xlabel("Households cooking with electricity")
+    a.set_ylabel("LCOE, US$/kWh")
+    a.set_ylim(0, 3.0)
+    a.set_title("(a) Cost of supply per kWh", loc="left")
+    a.legend([Patch(facecolor=PALETTE["neutral"], hatch="///", edgecolor="black"),
+              Patch(facecolor=SERIES[0], edgecolor="black"),
+              Patch(facecolor=SERIES[1], edgecolor="black")],
+             ["Per connection: connection,\nsoft cost, operation",
+              "Solar, battery, inverter (Rwanda)", "Solar, battery, inverter (Kenya)"],
+             fontsize=7, loc="upper right")
+    for i, (site, col) in enumerate(zip(SITE, SERIES)):
+        r = CP[CP.site == site].set_index("penetration").loc[pens]
+        b.plot(np.arange(len(pens)), r.avg_price_paid, **style(i), label=SITE[site])
+        for xi, (p, m) in enumerate(zip(r.avg_price_paid, r.lcoe_over_price)):
+            # Rwanda's price starts below Kenya's and ends above it: put each
+            # series' labels on the side away from the other line.
+            up = (r.avg_price_paid.iloc[xi] >=
+                  CP[(CP.site != site)].set_index("penetration").avg_price_paid.loc[pens[xi]])
+            b.annotate(f"{m:.0f}×" if m >= 10 else f"{m:.1f}×", (xi, p),
+                       xytext=(0, 8 if up else -15), textcoords="offset points",
+                       ha="center", fontsize=8, fontweight="bold", color=col)
+    b.set_xticks(np.arange(len(pens)))
+    b.set_xticklabels(lab)
+    b.set_xlabel("Households cooking with electricity")
+    b.set_ylabel("Average price paid, US$/kWh")
+    b.set_ylim(0, 0.19)
+    b.set_xlim(-0.3, len(pens) - 0.7)
+    b.set_title("(b) Price paid per kWh (labels: LCOE ÷ price)", loc="left", fontsize=9.5)
+    b.legend(fontsize=7.5, loc="upper left")
+    save(fig, out, "fig_cost_vs_price")
+
+
 def build(results, out=None):
     R = Path(results)
     out = Path(out or R / "figures")
+    if (R / "cost_vs_price.csv").exists():
+        fig_cost_vs_price(pd.read_csv(R / "cost_vs_price.csv"), out)
     fig1_structure(out)
     fig2_cooking(out)
     fig3_penetration(pd.read_csv(R / "scenarios_both.csv"), out)

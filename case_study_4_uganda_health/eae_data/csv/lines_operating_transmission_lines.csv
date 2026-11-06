@@ -1,0 +1,5 @@
+FID,voltage_kv,status,length_km
+0,66,Operational,30.494
+1,132,Operational,2201.956
+2,220,Operational,498.243
+3,400,Operational,302.157

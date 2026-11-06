@@ -45,6 +45,27 @@ node tools/eae_check.js
 
 All assumptions (EAE layers, ranges and weights, costs, eligibility) are in the notebook's first code cells.
 
+## All EAE layers for Uganda, saved
+
+`tools/download_eae_layers.py` downloads every Uganda layer in EAE (38 datasets) into `eae_data/`:
+
+- `rasters/`: GeoTIFF on EAE's 1 km grid, EPSG:3857.
+- `vectors/`: GeoJSON.
+- `csv/`: every point layer as a table (lon/lat plus attributes) and every line layer with its length.
+  Also one summary table per admin level (region, subregion, district, county, subcounty), with population,
+  wealth, solar, wind, land cover, grid distance and facility counts by electrification status.
+- `catalogue.csv`: source, date, licence and citation for each layer.
+
+The CSVs and catalogue are committed. The rasters and GeoJSON (about 100 MB) are not: rebuild them with
+
+```bash
+python tools/download_eae_layers.py
+```
+
+It works for other EAE countries too (`--geography Kenya --out eae_kenya`). Check each layer's licence in
+`catalogue.csv` before sharing. Most are CC BY 4.0; the Relative Wealth Index and crop layers are
+non-commercial; Protected Areas (WDPA) must not be redistributed.
+
 ## Outputs
 
 - `outputs/figures/`: seven report-ready figures (facility map, index maps, top-district drivers,

@@ -1,6 +1,6 @@
 EAE layer,reason
-Global Horizontal Irradiation (GHI),"Uniformly high: 5th-95th percentile 1,858-2,233 kWh/m2/yr, so solar works almost everywhere. In the ANI, EAE would also score low sunshine as higher need, which is backwards for a solar programme. GHI is checked at each funded site instead."
-Nighttime lights,"96% of cells are dark (≤0.09), so it barely separates rural areas."
-Planned distribution lines,Plans can slip; the plan targets facilities that need power now. Flagged for coordination.
-"Schools, financial services, mini-grids",Other demand and supply points; they would dilute a health-specific ranking.
-Protected areas,"Facilities already exist, and a rooftop system needs no new land."
+Global Horizontal Irradiation (GHI),"Solar resource is high almost everywhere (5th-95th percentile 1,858-2,233 kWh/m2/yr). Also, in the ANI EAE scores low GHI as higher need, which does not make sense for a solar programme. I only use GHI to check the funded sites."
+Nighttime lights,"96% of cells are dark, so it does not separate rural areas."
+Planned distribution lines,"Plans can be delayed, and the programme is for facilities that need power now."
+"Schools, financial services, mini-grids","Not related to health, they would dilute the ranking."
+Protected areas,The facilities already exist and rooftop systems do not need extra land.

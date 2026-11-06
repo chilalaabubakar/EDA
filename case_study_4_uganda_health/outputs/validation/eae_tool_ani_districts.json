@@ -1,0 +1,637 @@
+{
+ "active": [
+  {
+   "id": "distribution-lines",
+   "weight": 3,
+   "_domain": {
+    "max": 700,
+    "min": 0
+   },
+   "index": "supply"
+  },
+  {
+   "id": "health",
+   "weight": 5,
+   "_domain": {
+    "max": 5,
+    "min": 0
+   },
+   "index": "demand"
+  },
+  {
+   "id": "relative-wealth-index",
+   "weight": 4,
+   "_domain": {
+    "max": 2,
+    "min": -2
+   },
+   "index": "demand"
+  },
+  {
+   "id": "population-density",
+   "weight": 4,
+   "_domain": {
+    "max": 1500,
+    "min": 0
+   },
+   "index": "demand"
+  },
+  {
+   "id": "outline",
+   "weight": 3,
+   "_domain": {
+    "max": 0,
+    "min": 0
+   },
+   "index": null
+  }
+ ],
+ "areas": {
+  "0": {
+   "score": 0.43477736887964347,
+   "bucket": "Medium"
+  },
+  "1": {
+   "score": 0.6171604721351066,
+   "bucket": "Medium-High"
+  },
+  "2": {
+   "score": 0.6459727157682904,
+   "bucket": "Medium-High"
+  },
+  "3": {
+   "score": 0.5660734494732703,
+   "bucket": "Medium-High"
+  },
+  "4": {
+   "score": 0.5018860983725896,
+   "bucket": "Medium"
+  },
+  "5": {
+   "score": 0.6125019012185479,
+   "bucket": "Medium-High"
+  },
+  "6": {
+   "score": 0.580121611034829,
+   "bucket": "Medium-High"
+  },
+  "7": {
+   "score": 0.6076263131182885,
+   "bucket": "Medium-High"
+  },
+  "8": {
+   "score": 0.5123376283916468,
+   "bucket": "Medium"
+  },
+  "9": {
+   "score": 0.4493097736393085,
+   "bucket": "Medium"
+  },
+  "10": {
+   "score": 0.43134350460113574,
+   "bucket": "Medium"
+  },
+  "11": {
+   "score": 0.44979223848986183,
+   "bucket": "Medium"
+  },
+  "12": {
+   "score": 0.40727316345603265,
+   "bucket": "Low-Medium"
+  },
+  "13": {
+   "score": 0.7177868869830766,
+   "bucket": "High"
+  },
+  "14": {
+   "score": 0.45485461728120485,
+   "bucket": "Medium"
+  },
+  "15": {
+   "score": 0.46561357492655675,
+   "bucket": "Medium"
+  },
+  "16": {
+   "score": 0.6590569251739552,
+   "bucket": "Medium-High"
+  },
+  "17": {
+   "score": 0.49178374684189896,
+   "bucket": "Medium"
+  },
+  "18": {
+   "score": 0.45525624597762215,
+   "bucket": "Medium"
+  },
+  "19": {
+   "score": 0.4898017621261048,
+   "bucket": "Medium"
+  },
+  "20": {
+   "score": 0.43490846433801966,
+   "bucket": "Medium"
+  },
+  "21": {
+   "score": 0.45197530366668304,
+   "bucket": "Medium"
+  },
+  "22": {
+   "score": 0.521763696098515,
+   "bucket": "Medium"
+  },
+  "23": {
+   "score": 0.5051490557733607,
+   "bucket": "Medium"
+  },
+  "24": {
+   "score": 0.5973821853407092,
+   "bucket": "Medium-High"
+  },
+  "25": {
+   "score": 0.5762146077485051,
+   "bucket": "Medium-High"
+  },
+  "26": {
+   "score": 0.5355886677273419,
+   "bucket": "Medium"
+  },
+  "27": {
+   "score": 0.44721347113486576,
+   "bucket": "Medium"
+  },
+  "28": {
+   "score": 0.38551209871954234,
+   "bucket": "Low-Medium"
+  },
+  "29": {
+   "score": 0.609945972513817,
+   "bucket": "Medium-High"
+  },
+  "30": {
+   "score": 0.5923997835010206,
+   "bucket": "Medium-High"
+  },
+  "31": {
+   "score": 0.5605554663110384,
+   "bucket": "Medium-High"
+  },
+  "32": {
+   "score": 0.2987926361479315,
+   "bucket": "Low-Medium"
+  },
+  "33": {
+   "score": 0.4951698246492209,
+   "bucket": "Medium"
+  },
+  "34": {
+   "score": 0.5249339570763076,
+   "bucket": "Medium"
+  },
+  "35": {
+   "score": 0.3197262813146782,
+   "bucket": "Low-Medium"
+  },
+  "36": {
+   "score": 0.5287951027796025,
+   "bucket": "Medium"
+  },
+  "37": {
+   "score": 0.31397828544229694,
+   "bucket": "Low-Medium"
+  },
+  "38": {
+   "score": 0.6616428234052004,
+   "bucket": "Medium-High"
+  },
+  "39": {
+   "score": 0.5824831707017948,
+   "bucket": "Medium-High"
+  },
+  "40": {
+   "score": 0.9318732496069394,
+   "bucket": "High"
+  },
+  "41": {
+   "score": 0.4697597232471283,
+   "bucket": "Medium"
+  },
+  "42": {
+   "score": 0.3019205489614545,
+   "bucket": "Low-Medium"
+  },
+  "43": {
+   "score": 0.49981685829518036,
+   "bucket": "Medium"
+  },
+  "44": {
+   "score": 0.5941165777700856,
+   "bucket": "Medium-High"
+  },
+  "45": {
+   "score": 0.5313744468128193,
+   "bucket": "Medium"
+  },
+  "46": {
+   "score": 0.46047895957644913,
+   "bucket": "Medium"
+  },
+  "47": {
+   "score": 0.625048437482552,
+   "bucket": "Medium-High"
+  },
+  "48": {
+   "score": 0.6676082280058759,
+   "bucket": "Medium-High"
+  },
+  "49": {
+   "score": 0.4592452043169287,
+   "bucket": "Medium"
+  },
+  "50": {
+   "score": 0.5354216761396601,
+   "bucket": "Medium"
+  },
+  "51": {
+   "score": 0.5007719651489754,
+   "bucket": "Medium"
+  },
+  "52": {
+   "score": 0.5012523983004892,
+   "bucket": "Medium"
+  },
+  "53": {
+   "score": 0.01,
+   "bucket": "Low"
+  },
+  "54": {
+   "score": 0.8186316054064161,
+   "bucket": "High"
+  },
+  "55": {
+   "score": 0.6379957545682395,
+   "bucket": "Medium-High"
+  },
+  "56": {
+   "score": 0.6617504708233896,
+   "bucket": "Medium-High"
+  },
+  "57": {
+   "score": 0.49161848740809333,
+   "bucket": "Medium"
+  },
+  "58": {
+   "score": 0.5150236321708634,
+   "bucket": "Medium"
+  },
+  "59": {
+   "score": 0.4170340738098517,
+   "bucket": "Low-Medium"
+  },
+  "60": {
+   "score": 1,
+   "bucket": "High"
+  },
+  "61": {
+   "score": 0.6248358450673744,
+   "bucket": "Medium-High"
+  },
+  "62": {
+   "score": 0.5962723634984858,
+   "bucket": "Medium-High"
+  },
+  "63": {
+   "score": 0.6135391332277869,
+   "bucket": "Medium-High"
+  },
+  "64": {
+   "score": 0.5617687229788519,
+   "bucket": "Medium-High"
+  },
+  "65": {
+   "score": 0.4873971066264658,
+   "bucket": "Medium"
+  },
+  "66": {
+   "score": 0.528344080051665,
+   "bucket": "Medium"
+  },
+  "67": {
+   "score": 0.48306780733750176,
+   "bucket": "Medium"
+  },
+  "68": {
+   "score": 0.6152636989094183,
+   "bucket": "Medium-High"
+  },
+  "69": {
+   "score": 0.5015936605004517,
+   "bucket": "Medium"
+  },
+  "70": {
+   "score": 0.614209454322978,
+   "bucket": "Medium-High"
+  },
+  "71": {
+   "score": 0.5912382894941184,
+   "bucket": "Medium-High"
+  },
+  "72": {
+   "score": 0.4412774781879981,
+   "bucket": "Medium"
+  },
+  "73": {
+   "score": 0.5670707897787572,
+   "bucket": "Medium-High"
+  },
+  "74": {
+   "score": 0.48582008323209785,
+   "bucket": "Medium"
+  },
+  "75": {
+   "score": 0.5400762906747533,
+   "bucket": "Medium"
+  },
+  "76": {
+   "score": 0.4781760871428873,
+   "bucket": "Medium"
+  },
+  "77": {
+   "score": 0.5447611869684604,
+   "bucket": "Medium"
+  },
+  "78": {
+   "score": 0.5259976503769894,
+   "bucket": "Medium"
+  },
+  "79": {
+   "score": 0.5368224074938897,
+   "bucket": "Medium"
+  },
+  "80": {
+   "score": 0.5213500277209578,
+   "bucket": "Medium"
+  },
+  "81": {
+   "score": 0.5875917650289715,
+   "bucket": "Medium-High"
+  },
+  "82": {
+   "score": 0.7343387981347036,
+   "bucket": "High"
+  },
+  "83": {
+   "score": 0.6309339895525613,
+   "bucket": "Medium-High"
+  },
+  "84": {
+   "score": 0.6213130433669587,
+   "bucket": "Medium-High"
+  },
+  "85": {
+   "score": 0.5277983876841245,
+   "bucket": "Medium"
+  },
+  "86": {
+   "score": 0.3840224203952335,
+   "bucket": "Low-Medium"
+  },
+  "87": {
+   "score": 0.546150419073407,
+   "bucket": "Medium"
+  },
+  "88": {
+   "score": 0.8162129332447842,
+   "bucket": "High"
+  },
+  "89": {
+   "score": 0.5280717891954606,
+   "bucket": "Medium"
+  },
+  "90": {
+   "score": 0.48261130140849,
+   "bucket": "Medium"
+  },
+  "91": {
+   "score": 0.5674660912503016,
+   "bucket": "Medium-High"
+  },
+  "92": {
+   "score": 0.3958186027023891,
+   "bucket": "Low-Medium"
+  },
+  "93": {
+   "score": 0.4632421659221111,
+   "bucket": "Medium"
+  },
+  "94": {
+   "score": 0.4345697949106127,
+   "bucket": "Medium"
+  },
+  "95": {
+   "score": 0.3659190437487844,
+   "bucket": "Low-Medium"
+  },
+  "96": {
+   "score": 0.4769023120330781,
+   "bucket": "Medium"
+  },
+  "97": {
+   "score": 0.7215971837916936,
+   "bucket": "High"
+  },
+  "98": {
+   "score": 0.44848378876328465,
+   "bucket": "Medium"
+  },
+  "99": {
+   "score": 0.23889827233674368,
+   "bucket": "Low-Medium"
+  },
+  "100": {
+   "score": 0.48079331052560875,
+   "bucket": "Medium"
+  },
+  "101": {
+   "score": 0.37173638235386797,
+   "bucket": "Low-Medium"
+  },
+  "102": {
+   "score": 0.5110451804583767,
+   "bucket": "Medium"
+  },
+  "103": {
+   "score": 0.6957880455568412,
+   "bucket": "Medium-High"
+  },
+  "104": {
+   "score": 0.4733775169782607,
+   "bucket": "Medium"
+  },
+  "105": {
+   "score": 0.48784451359139025,
+   "bucket": "Medium"
+  },
+  "106": {
+   "score": 0.6073931952803227,
+   "bucket": "Medium-High"
+  },
+  "107": {
+   "score": 0.7891974298574257,
+   "bucket": "High"
+  },
+  "108": {
+   "score": 0.7924734489038084,
+   "bucket": "High"
+  },
+  "109": {
+   "score": 0.37736643857240504,
+   "bucket": "Low-Medium"
+  },
+  "110": {
+   "score": 0.46022369787543127,
+   "bucket": "Medium"
+  },
+  "111": {
+   "score": 0.502999159900153,
+   "bucket": "Medium"
+  },
+  "112": {
+   "score": 0.5884794659963103,
+   "bucket": "Medium-High"
+  },
+  "113": {
+   "score": 0.6307880255805935,
+   "bucket": "Medium-High"
+  },
+  "114": {
+   "score": 0.4561656898289151,
+   "bucket": "Medium"
+  },
+  "115": {
+   "score": 0.5998505172021378,
+   "bucket": "Medium-High"
+  },
+  "116": {
+   "score": 0.4696668451200356,
+   "bucket": "Medium"
+  },
+  "117": {
+   "score": 0.5772259225976182,
+   "bucket": "Medium-High"
+  },
+  "118": {
+   "score": 0.465053182189804,
+   "bucket": "Medium"
+  },
+  "119": {
+   "score": 0.39598094607646656,
+   "bucket": "Low-Medium"
+  },
+  "120": {
+   "score": 0.7853414250847797,
+   "bucket": "High"
+  },
+  "121": {
+   "score": 0.5253568156066635,
+   "bucket": "Medium"
+  },
+  "122": {
+   "score": 0.5661055381819604,
+   "bucket": "Medium-High"
+  },
+  "123": {
+   "score": 0.5436323410251999,
+   "bucket": "Medium"
+  },
+  "124": {
+   "score": 0.5060108507530988,
+   "bucket": "Medium"
+  },
+  "125": {
+   "score": 0.7048013930489999,
+   "bucket": "Medium-High"
+  },
+  "126": {
+   "score": 0.6385046422186534,
+   "bucket": "Medium-High"
+  },
+  "127": {
+   "score": 0.5877703533044489,
+   "bucket": "Medium-High"
+  },
+  "128": {
+   "score": 0.5282594406378538,
+   "bucket": "Medium"
+  },
+  "129": {
+   "score": 0.650511674506033,
+   "bucket": "Medium-High"
+  },
+  "130": {
+   "score": 0.5703422920028302,
+   "bucket": "Medium-High"
+  },
+  "131": {
+   "score": 0.4337257282649818,
+   "bucket": "Medium"
+  },
+  "132": {
+   "score": 0.4648284226647092,
+   "bucket": "Medium"
+  },
+  "133": {
+   "score": 0.8433261278715283,
+   "bucket": "High"
+  },
+  "134": {
+   "score": 0.43575981895251753,
+   "bucket": "Medium"
+  },
+  "135": {
+   "score": 0.6108885620725722,
+   "bucket": "Medium-High"
+  },
+  "136": {
+   "score": 0.5161689553166043,
+   "bucket": "Medium"
+  },
+  "137": {
+   "score": 0.523620178681005,
+   "bucket": "Medium"
+  },
+  "138": {
+   "score": 0.5200801233959599,
+   "bucket": "Medium"
+  },
+  "139": {
+   "score": 0.3362039507282186,
+   "bucket": "Low-Medium"
+  },
+  "140": {
+   "score": 0.579554852278742,
+   "bucket": "Medium-High"
+  },
+  "141": {
+   "score": 0.7034289577580147,
+   "bucket": "Medium-High"
+  },
+  "142": {
+   "score": 0.9065708517075614,
+   "bucket": "High"
+  },
+  "143": {
+   "score": 0.7570439940753778,
+   "bucket": "High"
+  },
+  "144": {
+   "score": 0.7514835950696117,
+   "bucket": "High"
+  },
+  "145": {
+   "score": 0.5025929197071907,
+   "bucket": "Medium"
+  }
+ },
+ "analysed_cells": 125210,
+ "retrieved": "2026-11-06T16:44:32.944Z"
+}

@@ -1,0 +1,8 @@
+variant,top 5,baseline top 5 kept in top 10,top 10 overlap with baseline
+Baseline (Section 3 settings),"Kasese, Isingiro, Tororo, Rukungiri, Kamuli",5,10
+EAE default population range (towns kept),"Wakiso, Kampala, Amudat, Buvuma, Lamwo",1,2
+Health facilities within 10 km,"Kasese, Isingiro, Tororo, Rukungiri, Luweero",5,10
+Without Relative Wealth Index,"Kasese, Isingiro, Tororo, Mukono, Rukungiri",5,9
+Only >2 km from lines (lecture filter),"Kasese, Terego, Isingiro, Buvuma, Adjumani",2,3
+Equal weights (all 3),"Kasese, Isingiro, Tororo, Rukungiri, Kamuli",5,9
+Count unelectrified facilities only*,"Kasese, Tororo, Rukungiri, Isingiro, Bugiri",4,7

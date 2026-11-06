@@ -1,0 +1,6 @@
+data/
+.ipynb_checkpoints/
+# Full EAE layers (about 100 MB): rebuild with tools/download_eae_layers.py
+eae_data/rasters/
+eae_data/vectors/
+*.zip

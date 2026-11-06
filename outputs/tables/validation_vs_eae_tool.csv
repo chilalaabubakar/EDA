@@ -1,0 +1,7 @@
+,value
+EAE settings used by the tool,"distribution-lines w3 [0, 700], health w5 [0, 5], relative-wealth-index w4 [-2, 2], population-density w4 [0, 1500]"
+districts scored (tool / notebook),146 / 146
+analysed 1 km cells (tool / notebook),"125,210 / 125,209"
+largest district score difference,0.0008
+districts in the same class,100%
+same rank (top 20 / all),100% / 99%

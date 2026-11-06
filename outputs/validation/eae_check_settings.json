@@ -1,0 +1,31 @@
+{
+ "geography": "5d137d39-e46d-4abc-bfc9-76254501fa09",
+ "index": "ani",
+ "divtier": 3,
+ "datasets": [
+  {
+   "id": "population-density",
+   "weight": 4,
+   "min": 0,
+   "max": 1500
+  },
+  {
+   "id": "relative-wealth-index",
+   "weight": 4,
+   "min": -2,
+   "max": 2
+  },
+  {
+   "id": "health",
+   "weight": 5,
+   "min": 0,
+   "max": 5
+  },
+  {
+   "id": "distribution-lines",
+   "weight": 3,
+   "min": 0,
+   "max": 700
+  }
+ ]
+}

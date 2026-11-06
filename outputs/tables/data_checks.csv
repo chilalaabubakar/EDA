@@ -1,0 +1,11 @@
+,value
+Facilities with unknown electrification status,130
+"Facilities with no WRI demand estimate (hospitals, clinics, RRH, NRH, SC)",514
+Facility district attribute differs from EAE district (new districts since),15%
+Unelectrified facilities within 1 km of an 11/33 kV line,68%
+Unelectrified facilities in cells with no Relative Wealth Index (dropped by EAE),23
+Eligible facilities counted in their district's EAE score,92%
+Health facility data content date,2023
+Distribution lines content date,2024
+Off-grid HC III/IV with unknown existing system size,410
+Lowest GHI at a funded site (kWh/m2/yr),1560.0

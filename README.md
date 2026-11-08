@@ -18,7 +18,8 @@ This notebook answers that with [Energy Access Explorer](https://www.energyacces
 4. **Ranks districts and tests the ranking.** It ranks districts on the Assistance Need Index, then checks
    the ranking under other indexes, filters and 500 random weightings.
 5. **Costs and allocates the budget.** Each facility is costed for solar PV with batteries, using sourced
-   costs. The US$1,000,000 is allocated three ways: need first, value for money, and a recommended plan.
+   costs. The US$1,000,000 is allocated four ways: need first, value for money, high-need cheapest first,
+   and a recommended plan that powers maternity wards first.
 6. **Tests sensitivity.** It varies costs, compares need with value for money, and asks what changes if
    UEDCL connects the facilities nearest the grid.
 
@@ -68,7 +69,7 @@ non-commercial; Protected Areas (WDPA) must not be redistributed.
 
 ## Outputs
 
-- `outputs/figures/`: seven report-ready figures (facility map, index maps, top-district drivers,
+- `outputs/figures/`: a screenshot of the live EAE tool and seven report-ready figures (facility map, index maps, top-district drivers,
   robustness, plan map, cost sensitivity, need vs value for money).
 - `outputs/tables/`: every table behind them as CSV. `key_numbers.json` holds the headline numbers.
   `eae_settings.csv` lists the exact settings to enter in the EAE web tool.

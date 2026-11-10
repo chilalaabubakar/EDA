@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from model import average_billed_rate, required_tariff, simulate
-from sizing import size_system
+from expansion import size_design
 
 
 def _ghi(r):
@@ -62,8 +62,8 @@ def run(cfg, sizing, builder, years, design_year, median_year, connections,
     tar0, _ = required_tariff(cfg, sizing, builder, years[design_year])
 
     # the cheaper alternative: size on the median-GHI year
-    sm, mm, _ = size_system(cfg, builder, years[median_year], connections,
-                            **(sizing_kw or {}))
+    sm, mm = size_design(cfg, builder, years[median_year], connections,
+                         **(sizing_kw or {}))
     dm = by_weather_year(cfg, sm, builder, years)
     regm = average_billed_rate(cfg, sm, builder, years[median_year])
     tarm, _ = required_tariff(cfg, sm, builder, years[median_year])

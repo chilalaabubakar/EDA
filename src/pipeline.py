@@ -152,9 +152,9 @@ def s_viability(ctx):
 
 @step("tables", "phase1")
 def s_tables(ctx):
-    from manuscript_tables import build_all, write
+    from manuscript_tables import build_all, supplementary, write
     tables, numbers = build_all(ctx.results)
-    write(tables, numbers, ctx.results / "tables")
+    write(tables, numbers, ctx.results / "tables", supplementary(ctx.results))
     print(f"  tables -> {ctx.results / 'tables'}")
 
 
@@ -198,14 +198,15 @@ def s_sizing_check(ctx):
         b = make_load_builder(cfg, ctx.n, pen, phi, ctx.seed)
         step_pv, step_b = (25.0, 100.0) if ctx.quick else (5.0, 20.0)
         pv, bt = sizing_check.default_grid(cfg, step_pv, step_b,
-                                           pv=(20, 400), batt=(0, 1400))
+                                           pv=(20, 300), batt=(0, 1000))
         label = f"{site} pen={pen} phi={phi} {mode}"
-        summ, grid = sizing_check.check(cfg, b, ctx.resource(site), ctx.conn, pv, bt,
-                                        label, _skw(ctx, cfg))
-        rows.append(summ)
+        summ, grid = sizing_check.check_staged(cfg, b, ctx.resource(site), ctx.conn, pv, bt,
+                                               label, _skw(ctx, cfg))
+        rows += summ
         grids.append(grid.assign(scenario=label))
-        print(f"  {label}: search {summ['search_lcoe']:.4f} vs grid "
-              f"{summ['grid_lcoe']:.4f} ({summ['lcoe_gap_pct']:+.2f}%)")
+        for r in summ:
+            print(f"  {label}, stage {r['stage']}: search {r['search_lcoe']:.4f} vs grid "
+                  f"{r['grid_lcoe']:.4f} ({r['lcoe_gap_pct']:+.2f}%)")
     pd.DataFrame(rows).to_csv(ctx.csv("sizing_check.csv"), index=False, float_format="%.10g")
     pd.concat(grids).to_csv(ctx.csv("sizing_check_grid.csv"), index=False, float_format="%.6g")
 
@@ -235,6 +236,7 @@ def s_ensemble(ctx):
         cfg = ctx.cfg(site)
         t = time.time()
         df = ensemble.run(cfg, ctx.resource(site), ctx.n, ctx.conn, seeds,
+                          workers=min(4, os.cpu_count() or 1),
                           sizing_kw=_skw(ctx, cfg))
         per.append(df.assign(site=site))
         summ.append(ensemble.summarise(df).assign(site=site))
@@ -262,29 +264,70 @@ def s_tou_sweep(ctx):
     pd.concat(be).to_csv(ctx.csv("tou_break_even.csv"), index=False, float_format="%.10g")
 
 
-@step("esmap", "phase2")
-def s_esmap(ctx):
-    import esmap
-    wf, comp = [], []
+@step("components", "phase2")
+def s_components(ctx):
+    """Levelised cost split by cost line, at each adoption level."""
+    from cost_vs_price import lcoe_components
+    comp = []
     for site in ctx.sites:
-        cfg, b, res, sizing = _headline(ctx, site)
-        wf.append(esmap.waterfall(cfg, b, res, ctx.conn, _skw(ctx, cfg)).assign(site=site))
-        comp.append({"site": site, **esmap.lcoe_components(cfg, sizing, b, res)})
-    pd.concat(wf).to_csv(ctx.csv("esmap_waterfall.csv"), index=False, float_format="%.10g")
+        for pen in (0.0, 1.0):
+            cfg, b, res, sizing = _headline(ctx, site, pen)
+            comp.append({"site": site, "penetration": pen,
+                         **lcoe_components(cfg, sizing, b, res)})
     pd.DataFrame(comp).to_csv(ctx.csv("lcoe_components.csv"), index=False,
                               float_format="%.10g")
+
+
+@step("sensitivity", "phase2")
+def s_sensitivity(ctx):
+    """Input sensitivity, structural alternatives and the bridge from the
+    first submission's base case (sensitivity.py)."""
+    import sensitivity
+    oat, st, br = [], [], []
+    for site in ctx.sites:
+        cfg, res = ctx.cfg(site), ctx.resource(site)
+        t = time.time()
+        oat.append(sensitivity.one_at_a_time(cfg, res, ctx.n, ctx.conn, ctx.seed).assign(site=site))
+        st.append(sensitivity.structural(cfg, res, ctx.n, ctx.conn, ctx.seed).assign(site=site))
+        br.append(sensitivity.bridge(cfg, res, ctx.n, ctx.conn, ctx.seed).assign(site=site))
+        print(f"  sensitivity {site}: {time.time()-t:.0f}s")
+    pd.concat(oat).to_csv(ctx.csv("sensitivity.csv"), index=False, float_format="%.10g")
+    pd.concat(st).to_csv(ctx.csv("structural.csv"), index=False, float_format="%.10g")
+    pd.concat(br).to_csv(ctx.csv("bridge.csv"), index=False, float_format="%.10g")
 
 
 # --------------------------------------------------------------------- phase 3
 @step("operating_subsidy", "phase3")
 def s_opsub(ctx):
     import operating_subsidy
-    rows = []
+    S = ctx.read("scenarios_both.csv")
+    rows, burden, carbon = [], [], []
     for site in ctx.sites:
         cfg, b, res, sizing = _headline(ctx, site)
         rows.append({"site": site, **operating_subsidy.cost(cfg, sizing, b, res, ctx.n)})
+        pens = sorted(S[(S.site == site) & S.feasible & (S.tariff == "flat")].penetration.unique())
+        designs = {}
+        for pen in pens:
+            _, bp, _, sp = _headline(ctx, site, pen)
+            designs[pen] = (sp, bp)
+        bd = operating_subsidy.by_adoption(cfg, site, designs, res, ctx.conn)
+        burden.append(bd)
+        carbon.append(operating_subsidy.carbon(bd[bd.penetration == max(pens)].iloc[0]))
     pd.DataFrame(rows).to_csv(ctx.csv("operating_subsidy.csv"), index=False,
                               float_format="%.10g")
+    pd.concat(burden).to_csv(ctx.csv("burden.csv"), index=False, float_format="%.10g")
+    pd.concat(carbon).to_csv(ctx.csv("carbon.csv"), index=False, float_format="%.10g")
+
+
+@step("tariff_scenarios", "phase3")
+def s_tariff_scenarios(ctx):
+    """Full adoption under the national tariff, two site-specific tariffs and
+    the break-even tariff: operator's result and the household's bill."""
+    from viability import tariff_scenarios
+    S = ctx.read("scenarios_both.csv")
+    res = {s: ctx.resource(s) for s in ctx.sites}
+    tariff_scenarios(S, res, ctx.n, ctx.conn, ctx.seed).to_csv(
+        ctx.csv("tariff_scenarios.csv"), index=False, float_format="%.10g")
 
 
 @step("peaks", "phase3")

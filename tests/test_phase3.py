@@ -42,9 +42,15 @@ def test_operating_subsidy_costing_outputs(setup):
     out = O.cost(cfg, s, b, RES)
     assert out["opsub_grant0_usd_per_village_year1"] == pytest.approx(
         out["opsub_grant0_usd_per_conn_year"] * 300)
-    # more non-renewable biomass -> more CO2 avoided -> cheaper per tonne
-    assert out["usd_per_tco2_fnrb0.8"] < out["usd_per_tco2_fnrb0.1"]
-    assert out["rwanda_rbf_per_connection_usd"] == "source needed"
+    # The subsidy is level in real terms, so its present value is the annual
+    # amount times the annuity factor, it equals the loss it closes, and each
+    # dollar of capital grant saves the capital recovery factor a year.
+    r, life = cfg["finance"]["discount_rate_real"], cfg["finance"]["project_life_years"]
+    assert out["opsub_grant0_npv_usd"] == pytest.approx(
+        out["opsub_grant0_usd_per_conn_year"] * 300 * O.annuity_factor(r, life))
+    assert out["opsub_grant0_npv_usd"] == pytest.approx(-out["npv"], rel=2e-3)
+    assert out["implied_capital_recovery_factor"] == pytest.approx(
+        out["capital_recovery_factor"], rel=2e-3)
 
 
 def test_wood_parity_parameter():

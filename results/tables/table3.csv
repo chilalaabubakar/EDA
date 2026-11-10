@@ -1,4 +1,4 @@
-Penetration,Rwanda PV / storage,Rwanda LCOE,Kenya PV / storage,Kenya LCOE
-0%,70 kW / 180 kWh,$2.68,110 kW / 320 kWh,$1.72
-50%,215 kW / 480 kWh,$1.32,240 kW / 620 kWh,$1.15
-100%,365 kW / 780 kWh,$1.08,380 kW / 900 kWh,$0.99
+Households cooking,Rwanda solar / battery,Rwanda LCOE,Kenya solar / battery,Kenya LCOE
+0%,30 → 35 kW / 100 → 120 kWh,$2.21,50 → 60 kW / 160 → 200 kWh,$1.39
+50%,80 → 90 kW / 220 → 260 kWh,$1.04,95 → 105 kW / 280 → 360 kWh,$0.89
+100%,135 → 150 kW / 340 → 380 kWh,$0.81,145 → 160 kW / 400 → 460 kWh,$0.74

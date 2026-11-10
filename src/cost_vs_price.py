@@ -16,15 +16,48 @@ results/bill_example.csv (one row per site, year one).
 """
 import pandas as pd
 
-from esmap import lcoe_components
 from final_cfg import KES_USD, RWF_USD
 from model import _band_rate, average_billed_rate, simulate
 from run_scenarios import make_load_builder
 from viability import headline_sizing
 
-SUPPLY = ["pv", "pv_soft", "battery", "battery_soft", "battery_replacement",
-          "inverter", "inverter_soft"]
 FX = {"rwanda": ("RWF", RWF_USD), "kenya": ("KES", KES_USD)}
+
+
+def lcoe_components(cfg, sizing, builder, res):
+    """Levelised cost split by cost line ($/kWh, same discounting as LCOE).
+
+    per_connection_fixed  the connection, its share of soft costs and the
+                          customer part of operating cost: these do not change
+                          with how much a household uses.
+    supply                everything that grows with demand: solar, battery
+                          and inverter with their soft costs, the second-stage
+                          expansion, battery replacement, the plant part of
+                          operating cost and any generator fuel.
+    """
+    df, m = simulate(cfg, sizing, builder, res)
+    r = cfg["finance"]["discount_rate_real"]
+    disc = (1 + r) ** df.year.values
+    energy = (df.served_kwh.values / disc).sum()
+    items = m["capex_items"]
+    hard = [k for k in ("pv", "battery", "inverter", "connections", "generator") if k in items]
+    sub = sum(items[k] for k in hard)
+    out = {k: items[k] / energy for k in hard}
+    for k in hard:                                           # allocate soft cost
+        out[k + "_soft"] = items["soft"] * items[k] / sub / energy
+    out["expansion"] = (df.capex_addition.values / disc).sum() / energy
+    out["battery_replacement"] = (df.replacement.values / disc).sum() / energy
+    customer = cfg["opex"].get("per_customer_year", 0.0) * sizing["connections"] \
+        if cfg["opex"]["basis"] in ("split", "per_customer") else 0.0
+    esc = (1 + cfg["opex"]["escalation_rate"]) ** (df.year.values - 1)
+    out["opex_customer"] = (customer * esc / disc).sum() / energy
+    out["opex_plant"] = (df.opex.values / disc).sum() / energy - out["opex_customer"]
+    out["total"] = sum(out.values())
+    out["lcoe_check"] = m["lcoe"]
+    out["per_connection_fixed"] = (out["connections"] + out["connections_soft"]
+                                   + out["opex_customer"])
+    out["supply"] = out["total"] - out["per_connection_fixed"]
+    return out
 
 
 def run(cfg, site, scenarios, resource, n_households, connections, seed=42,
@@ -41,11 +74,17 @@ def run(cfg, site, scenarios, resource, n_households, connections, seed=42,
         disc = (1 + cfg["finance"]["discount_rate_real"]) ** df.year.values
         rows.append({
             "site": site, "penetration": pen, "pv_kw": sizing["pv_kw"], "battery_kwh": sizing["battery_kwh"],
+            "pv_kw_final": sizing["stages"][-1]["pv_kw"] if sizing.get("stages") else sizing["pv_kw"],
+            "battery_kwh_bought": sizing["battery_kwh"] + (
+                sizing["stages"][-1]["battery_kwh"] if sizing.get("stages") else sizing["battery_kwh"]),
+            "capital_pv": float(m["capex_items"]["_gross_capex"]
+                                + ((df.capex_addition + df.replacement).values / disc).sum()),
+            "curtailed_fraction": m["curtailed_fraction"],
             "gross_capex": m["capex_items"]["_gross_capex"],
             "kwh_per_connection_year1": float(df.served_kwh.iloc[0]) / connections,
             "served_kwh_pv": float((df.served_kwh.values / disc).sum()),
             "lcoe": m["lcoe"], "per_connection_fixed": comp["per_connection_fixed"],
-            "supply": sum(comp[k] for k in SUPPLY),
+            "supply": comp["supply"],
             "avg_price_paid": price, "lcoe_over_price": m["lcoe"] / price,
             "gap_per_kwh": m["lcoe"] - price, "npv": m["npv"]})
     return pd.DataFrame(rows)

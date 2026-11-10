@@ -24,23 +24,56 @@ BASE_CFG = {
  # labelled "fallback only". s3.7 of the manuscript describes the per-customer
  # basis, so that is what the code now does. Set basis="capex_fraction" to
  # reproduce the previously published numbers.
- "opex":{"basis":"per_customer",
-         "per_customer_year":80.0,     # SEforALL range $8-263/customer/yr
-         "escalation_rate":0.05,
+ #
+ # REVIEW REVISION. basis="split": operating cost has a customer part and a
+ # plant part, so it grows when the plant grows:
+ #   per_customer_year        customer service, billing, site staff, overheads
+ #   plant_fraction_per_year  maintenance and insurance, as a share of the
+ #                            installed cost (soft costs included) of the solar
+ #                            array, battery and inverter in service that year
+ # At the benchmark's roughly US$1,000 of equipment per connection the two sum
+ # to about $80/customer/yr (SEforALL range $8-263). AMDA's Kenyan financial
+ # models put total operating cost at 1.5-6.4% of capital cost a year.
+ # escalation_rate is REAL: the model is in constant 2025 US$ and discounts at
+ # a real rate, so 0.0 means costs rise with inflation and no faster. (It was
+ # 0.05, a 5%/yr real increase that nothing supported.)
+ "opex":{"basis":"split",
+         "per_customer_year":60.0,
+         "plant_fraction_per_year":0.02,
+         "escalation_rate":0.0,
          "om_fraction_of_capex_per_year":0.04, "staff_annual":6000},
+ # The target return equals the discount rate: the project is viable when its
+ # net present value at the cost of capital is zero. (It was the discount rate
+ # plus three points, a margin with no source.) 12% real is the base rate, the
+ # rate AMDA's Kenyan cost models use; 8-20% is tested.
  "finance":{"discount_rate_real":0.12,"tax_rate":0.0,"project_life_years":20,
-            "target_irr":0.15},
+            "target_irr":0.12},
  "tariff":{"flat_rate_per_kwh":0.146,"bands":None,"telescopic":False,
            "daytime_discount_per_kwh":0.0,"daytime_window_hours":[9,16],
-           "collection_rate":0.90},
+           "collection_rate":0.90,
+           # price paid by a commercial (anchor) customer, where one is modelled
+           "anchor_rate_per_kwh":None},
  # DIESEL CUT (Phase 1). Every reported scenario ran with diesel_kw = 0, so
  # the generator, fuel prices and fuel escalation were removed from the model.
  # s3.4 ("diesel backup last") and the RURA/EPRA fuel-price sources go too.
  # Enforced on the WORST project year of the full simulation (s3.5), not on
  # the lifetime average. See sizing.py.
  "reliability":{"max_unmet_demand_fraction":0.05},
- "demand":{"annual_growth_rate":0.05},
- "sizing":{"pv_range":[10,900],"battery_range":[0,3000]},
+ # REVIEW REVISION. Growth applies to appliance (non-cooking) demand only, and
+ # at 2% a year: Kenyan billing data show use per rural customer levelling off
+ # within a year or two of connection and then falling (Fobi et al. 2018),
+ # while appliance ownership keeps spreading. Cooking energy per household
+ # does not grow: the same meals are cooked in year 20 as in year 1. (Both
+ # grew at 5% a year, which took a cooking household to 2.5 kWh a day.)
+ "demand":{"annual_growth_rate":0.02, "cooking_growth_rate":0.0},
+ # build: "staged" = built for years 1-10 and enlarged when the battery is
+ # replaced (base case); "single" = one plant sized for the worst of 20 years.
+ "sizing":{"pv_range":[10,900],"battery_range":[0,3000],"build":"staged"},
+ # Backup generator, used only in the hybrid sensitivity (sizing carries
+ # generator_kw). ASSUMPTIONS, tested over a range: see Table S1.
+ "generator":{"capex_per_kw":500.0, "fuel_l_per_kwh":0.33,
+              "fuel_price_per_l":1.50, "om_per_kwh":0.03,
+              "co2_kg_per_l":2.68},
  "scenarios":{"penetration_sweep":[0.0,0.5,1.0],
               "shiftable_fraction_sweep":[0.0,0.3,0.5],
               "tariffs":["flat","tou"],
@@ -189,7 +222,10 @@ COUNTRY_OVERRIDES = {
  # RURA, effective 1 Oct 2025. Telescopic bands.
  "rwanda": {"tariff":{"flat_rate_per_kwh":214/RWF_USD,
                       "bands":[(20, 89/RWF_USD),(50, 310/RWF_USD),(10**9, 369/RWF_USD)],
-                      "telescopic":True},
+                      "telescopic":True,
+                      # anchor customer billed at the top residential block
+                      # (the non-residential schedule is close to it)
+                      "anchor_rate_per_kwh":369/RWF_USD},
             "appliances":APPLIANCES_RWANDA},
  # EPRA Schedule of Tariffs 2023, Kenya Gazette Notice No. 3899 (special issue,
  # 24 Mar 2023), Part II rates effective 1 July 2025: DC1 lifeline (<= 30 kWh)
@@ -198,7 +234,10 @@ COUNTRY_OVERRIDES = {
  # monthly use selects one band and every unit pays that band's price.
  "kenya":  {"tariff":{"flat_rate_per_kwh":16.50/KES_USD,
                       "bands":[(30, 12.14/KES_USD),(100, 16.50/KES_USD),(10**9, 18.57/KES_USD)],
-                      "telescopic":False},
+                      "telescopic":False,
+                      # Small Commercial SC3 (> 100 units), same schedule,
+                      # effective 1 July 2025: KES 19.00 per unit
+                      "anchor_rate_per_kwh":19.00/KES_USD},
             "appliances":APPLIANCES_KENYA},
 }
 DISCOUNT_RATES = [0.08, 0.12, 0.15, 0.20]   # no published benchmark exists - sweep it

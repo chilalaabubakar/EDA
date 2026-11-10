@@ -1,5 +1,5 @@
-basis,connections,pv_kw,battery_kwh,inverter_kw,w_per_connection,kwh_storage_per_kwp,lcoe,kwh_per_connection_year1,kwh_per_connection_final_year,max_solar_kwh_per_connection_year,ac_kwh_per_kw_year1,pv_multiple_of_installed,regulated_tariff_model,tariff_installed
-"model, eCooking 0%",140,50,160,25,357.1428571,3.2,1.716864582,147.1834978,371.9253686,,1505.268357,2.5,0.1279069767,
-"model, eCooking 50%",140,110,300,60,785.7142857,2.727272727,1.156411174,330.2115931,834.4282497,,1505.268357,5.5,0.1279069767,
-"model, eCooking 100%",140,180,420,90,1285.714286,2.333333333,1.001923914,512.5515931,1295.192348,,1505.268357,9,0.1279069767,
-installed (TaiyangNews 2018; Renewvia Energy minigrid sites),140,20,,,142.8571429,,,,,215.0383367,1505.268357,1,0.1279069767,
+basis,connections,pv_kw,battery_kwh,inverter_kw,pv_kw_final,w_per_connection,kwh_storage_per_kwp,lcoe,kwh_per_connection_year1,kwh_per_connection_final_year,max_solar_kwh_per_connection_year,ac_kwh_per_kw_year1,pv_multiple_of_installed,regulated_tariff_model,tariff_installed
+"model, eCooking 0%",140,25,80,15,30,178.5714286,3.2,1.405491227,147.1834978,214.4185641,,1505.268357,1.25,0.1279069767,
+"model, eCooking 50%",140,45,140,25,50,321.4285714,3.111111111,0.9017867285,330.2115931,397.4466593,,1505.268357,2.25,0.1279069767,
+"model, eCooking 100%",140,65,200,40,75,464.2857143,3.076923077,0.7458307354,512.5515931,579.7866593,,1505.268357,3.25,0.1279069767,
+installed (TaiyangNews 2018; Renewvia Energy minigrid sites),140,20,,,,142.8571429,,,,,215.0383367,1505.268357,1,0.1279069767,

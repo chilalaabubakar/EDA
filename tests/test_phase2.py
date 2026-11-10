@@ -165,9 +165,12 @@ def test_window_recentres_when_the_coarse_optimum_is_off(cfg, monkeypatch):
 def test_ensemble_summary_has_cis():
     import ensemble
     import pandas as pd
-    df = pd.DataFrame({q: np.random.default_rng(0).normal(10, 1, 24)
-                       for q in ensemble.QUANTITIES})
+    cols = ["lcoe_reduction_pct_0_to_full", "incremental_usd_per_cooking_hh_year",
+            "avoided_battery_pct_phi50", "break_even_discount_phi50"]
+    df = pd.DataFrame({q: np.random.default_rng(0).normal(10, 1, 24) for q in cols})
+    df.insert(0, "seed", range(1, 25))
     s = ensemble.summarise(df).set_index("quantity")
+    assert "seed" not in s.index
     assert (s.ci95_lo < s["mean"]).all() and (s["mean"] < s.ci95_hi).all()
     assert (s.n_seeds == 24).all()
 
@@ -193,17 +196,23 @@ def test_elastic_response_does_scale_with_discount(cfg):
     assert b > a
 
 
-# ---------------------------------------------------------------- ESMAP
-def test_esmap_components_sum_to_lcoe(cfg, builder, headline):
-    import esmap
-    c = esmap.lcoe_components(cfg, headline[0], builder, RES)
+# ------------------------------------------------------- cost components
+def test_lcoe_components_sum_to_lcoe(cfg, builder, headline):
+    from cost_vs_price import lcoe_components
+    c = lcoe_components(cfg, headline[0], builder, RES)
     assert c["total"] == pytest.approx(c["lcoe_check"], rel=1e-9)
+    assert c["per_connection_fixed"] + c["supply"] == pytest.approx(c["total"], rel=1e-9)
 
 
-def test_esmap_waterfall_moves_towards_benchmark(cfg, builder):
-    import esmap
-    wf = esmap.waterfall(cfg, builder, RES, 300, KW)
-    assert wf.lcoe.is_monotonic_decreasing
+def test_lcoe_components_include_the_second_stage(cfg, builder):
+    """A staged build spends capital in year 10; the split must carry it."""
+    import expansion
+    from cost_vs_price import lcoe_components
+    st = expansion.size_staged(cfg, builder, RES, 300, sizing_kw=KW)
+    c = lcoe_components(cfg, st, builder, RES)
+    assert c["total"] == pytest.approx(c["lcoe_check"], rel=1e-9)
+    if st["stages"][1]["pv_kw"] > st["stages"][0]["pv_kw"]:
+        assert c["expansion"] > 0
 
 
 def test_published_designs_hold_in_every_weather_year():

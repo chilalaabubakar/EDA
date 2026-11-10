@@ -26,8 +26,12 @@ def bill(kwh, t):
     return _band_rate(kwh, t) * kwh
 
 
-def household_monthly(cfg, n, penetration, phi, seed):
-    """(n, 12) kWh per household per month in year 1."""
+def household_monthly(cfg, n, penetration, phi, seed, year=1):
+    """(n, 12) kWh per household per month in project year `year`. Appliance
+    use and cooking grow at their own rates (cfg['demand'])."""
+    g = (1 + cfg["demand"]["annual_growth_rate"]) ** (year - 1)
+    gc = (1 + cfg["demand"].get("cooking_growth_rate",
+                                cfg["demand"]["annual_growth_rate"])) ** (year - 1)
     b = make_load_builder(cfg, n, penetration, phi, seed)
     agg_month = np.array([b.noncooking[a:z].sum() for a, z in
                           zip(MONTH_EDGES[:-1], MONTH_EDGES[1:])])
@@ -35,18 +39,16 @@ def household_monthly(cfg, n, penetration, phi, seed):
     nc *= (agg_month / nc.sum(axis=0).clip(min=1e-12))[None, :]
     _, cook = build_cooking_load(n, penetration, phi, seed=seed,
                                  return_household_monthly=True)
-    hh = nc.copy()
-    hh[:len(cook)] += cook               # cooking households are the first n_cook
+    hh = nc * g
+    hh[:len(cook)] += cook * gc          # cooking households are the first n_cook
     return hh
 
 
 def check(cfg, n=300, penetration=1.0, phi=0.0, seed=42, years=(1, 10, 20)):
     t = cfg["tariff"]
-    g = cfg["demand"]["annual_growth_rate"]
-    base = household_monthly(cfg, n, penetration, phi, seed)
     rows = []
     for y in years:
-        hh = base * (1 + g) ** (y - 1)
+        hh = household_monthly(cfg, n, penetration, phi, seed, y)
         mean = hh.mean(axis=0)
         rev_hh = sum(bill(k, t) for k in hh.ravel())
         rev_mean = sum(n * bill(k, t) for k in mean)
@@ -76,9 +78,8 @@ def adoption_penalty_distribution(cfg, n=300, seed=42, year=1):
     """Each household's blended-rate factor on adopting eCooking: its own
     non-cooking consumption, with and without its own cooking load."""
     t = cfg["tariff"]
-    g = (1 + cfg["demand"]["annual_growth_rate"]) ** (year - 1)
-    pre = household_monthly(cfg, n, 0.0, 0.0, seed) * g
-    post = household_monthly(cfg, n, 1.0, 0.0, seed) * g
+    pre = household_monthly(cfg, n, 0.0, 0.0, seed, year)
+    post = household_monthly(cfg, n, 1.0, 0.0, seed, year)
     rate = lambda m: sum(bill(k, t) for k in m) / max(m.sum(), 1e-12)
     f = np.array([rate(b) / rate(a) for a, b in zip(pre, post) if a.sum() > 0])
     mean_pre, mean_post = pre.mean(axis=0), post.mean(axis=0)

@@ -18,9 +18,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+HOURS = 8760
+
+from expansion import size_design
 from load_builder import build_cooking_load, build_noncooking_load
 from model import simulate
-from sizing import size_system
 
 _COOK_CACHE = {}
 
@@ -33,19 +35,41 @@ def cooking_load(n_households, penetration, phi, seed, params=None):
     return _COOK_CACHE[key]
 
 
+def anchor_profile(kwh_per_day, window=(8, 17), days_per_week=6):
+    """Constant daytime load of a commercial (anchor) customer, kW per hour:
+    `kwh_per_day` spread evenly over `window`, on `days_per_week` days."""
+    h = np.arange(HOURS) % 24
+    d = (np.arange(HOURS) // 24) % 7
+    on = (h >= window[0]) & (h < window[1]) & (d < days_per_week)
+    return np.where(on, kwh_per_day / (window[1] - window[0]), 0.0)
+
+
 def make_load_builder(cfg, n_households, penetration, phi, seed,
-                      cooking_params=None):
+                      cooking_params=None, anchor_kwh_day=0.0):
     """year -> 8760 kW array. Appliance (RAMP) and cooking loads are both
-    seeded by `seed`; demand grows at cfg['demand']['annual_growth_rate']."""
+    seeded by `seed`.
+
+    Growth is applied separately. Appliance demand grows at
+    cfg['demand']['annual_growth_rate']; cooking at 'cooking_growth_rate'
+    (zero in the base case: a household cooks the same meals every year).
+    `anchor_kwh_day` adds a commercial daytime load that does not grow; the
+    builder then carries `.anchor(year)` so revenue can bill it separately.
+    """
     base = build_noncooking_load(cfg["appliances"], n_households, None, seed=seed)
     cook = cooking_load(n_households, penetration, phi, seed, cooking_params)
     growth = cfg["demand"]["annual_growth_rate"]
-    total = base + cook
+    cook_growth = cfg["demand"].get("cooking_growth_rate", growth)
+    anchor = anchor_profile(anchor_kwh_day) if anchor_kwh_day else None
 
     def builder(year):
-        return total * (1 + growth) ** (year - 1)
+        out = base * (1 + growth) ** (year - 1) + cook * (1 + cook_growth) ** (year - 1)
+        return out + anchor if anchor is not None else out
     builder.noncooking = base
     builder.cooking = cook
+    builder.cooking_in_year = lambda year: cook * (1 + cook_growth) ** (year - 1)
+    builder.noncooking_in_year = lambda year: base * (1 + growth) ** (year - 1)
+    if anchor is not None:
+        builder.anchor = lambda year: anchor
     return builder
 
 
@@ -69,6 +93,9 @@ def scenario_row(cfg, resource, n_households, connections, pen, phi, tariff,
                  sizing_cache=None):
     """Size and evaluate one scenario.
 
+    The design is the least-cost build named in cfg['sizing']['build']: a
+    two-stage build in the base case (expansion.size_design).
+
     Sizing depends on the load (penetration, effective phi, seed) but not on
     the tariff: dispatch ignores price and LCOE is a cost metric. Passing a
     dict as `sizing_cache` reuses the least-cost sizing across tariff arms with
@@ -89,7 +116,7 @@ def scenario_row(cfg, resource, n_households, connections, pen, phi, tariff,
         s = sizing_cache[key]
         m = simulate(c, s, builder, resource, tariff_mode=tariff)[1] if s else None
     else:
-        s, m, _ = size_system(c, builder, resource, connections, **kw)
+        s, m = size_design(c, builder, resource, connections, **kw)
         if sizing_cache is not None:
             sizing_cache[key] = s
     row = {"penetration": pen, "phi": phi, "phi_effective": phi_eff,
@@ -98,10 +125,19 @@ def scenario_row(cfg, resource, n_households, connections, pen, phi, tariff,
     if s is None:
         return row
     cook = builder.cooking
+    st2 = s["stages"][1] if s.get("stages") else None
     row.update({
         "pv_kw": s["pv_kw"], "battery_kwh": s["battery_kwh"],
         "inverter_kw": m["capex_items"]["inverter"] / cfg["capex"]["inverter_per_kw"],
         "inverter_limits_battery": bool(s.get("inverter_limits_battery", False)),
+        # second stage of a staged build (blank for a single-stage one)
+        "stage2_from_year": st2["from_year"] if st2 else np.nan,
+        "pv_kw_stage2": st2["pv_kw"] if st2 else np.nan,
+        "battery_kwh_stage2": st2["battery_kwh"] if st2 else np.nan,
+        "inverter_kw_stage2": st2.get("inverter_kw", np.nan) if st2 else np.nan,
+        # batteries bought over the project: the first bank and its replacement
+        "battery_kwh_bought": s["battery_kwh"] + (st2["battery_kwh"] if st2
+                                                   else s["battery_kwh"]),
         "lcoe": m["lcoe"], "npv": m["npv"], "irr": m["irr"],
         "unmet_fraction": m["unmet_fraction"],
         "worst_year_unmet_fraction": m["worst_year_unmet_fraction"],
@@ -150,6 +186,10 @@ def substitution_frontier(df):
     tou = df[(df.tariff == "tou") & df.feasible].copy()
     idx = tou.set_index(["penetration", "phi"]).index
     tou["battery_flat"] = idx.map(flat.battery_kwh)
+    tou["battery_bought_flat"] = idx.map(flat.battery_kwh_bought)
+    tou["avoided_battery_bought_kwh"] = tou.battery_bought_flat - tou.battery_kwh_bought
+    tou["avoided_battery_bought_pct"] = (100 * tou.avoided_battery_bought_kwh
+                                         / tou.battery_bought_flat)
     tou["lcoe_flat"] = idx.map(flat.lcoe)
     tou["peak_cooking_kw_flat"] = idx.map(flat.peak_cooking_kw_year1)
     tou["avoided_battery_kwh"] = tou.battery_flat - tou.battery_kwh

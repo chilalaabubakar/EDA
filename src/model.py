@@ -345,6 +345,8 @@ def capex(cfg, sizing):
         "inverter": inverter_kw(cfg, sizing) * c["inverter_per_kw"],
         "connections": sizing["connections"] * c["connection_per_customer"],
     }
+    if sizing.get("generator_kw"):          # hybrid sensitivity only
+        items["generator"] = sizing["generator_kw"] * cfg["generator"]["capex_per_kw"]
     subtotal = sum(items.values())
     items["soft"] = subtotal * c["soft_cost_fraction"]
     total = sum(items.values())
@@ -357,6 +359,16 @@ def capex(cfg, sizing):
         items["grant"] = -total * grant
         total *= (1 - grant)
     return total, items
+
+
+def plant_value(cfg, sizing):
+    """Installed cost, soft costs included, of the solar array, battery and
+    inverter: the base for the plant part of operating cost."""
+    c = cfg["capex"]
+    return ((sizing["pv_kw"] * c["pv_per_kw"]
+             + sizing["battery_kwh"] * c["battery_per_kwh"]
+             + inverter_kw(cfg, sizing) * c["inverter_per_kw"])
+            * (1 + c["soft_cost_fraction"]))
 
 
 def fixed_opex_year_one(cfg, sizing, gross_capex):
@@ -386,6 +398,10 @@ def fixed_opex_year_one(cfg, sizing, gross_capex):
             "'capex_fraction'. It was previously implicit, and the value the "
             "code used ('capex_fraction') was not the one the manuscript "
             "described ('per_customer').")
+    if basis == "split":
+        # customer part + plant part (base case; see final_cfg.py)
+        return (o["per_customer_year"] * sizing["connections"]
+                + o["plant_fraction_per_year"] * plant_value(cfg, sizing))
     if basis == "per_customer":
         return o["per_customer_year"] * sizing["connections"]
     if basis == "capex_fraction":
@@ -412,8 +428,14 @@ def financials(annual, cfg, sizing, total_capex, gross_capex=None):
     if gross_capex is None:
         gross_capex = total_capex
     fixed = fixed_opex_year_one(cfg, sizing, gross_capex)
+    if cfg["opex"].get("basis") == "split" and "plant_value" in df:
+        # the plant in service changes when a staged build is enlarged
+        o = cfg["opex"]
+        fixed = (o["per_customer_year"] * sizing["connections"]
+                 + o["plant_fraction_per_year"] * df.plant_value)
     df["fixed_opex"] = fixed * esc_opex
-    df["opex"] = df.fixed_opex
+    # extra_opex: generator fuel and running cost (hybrid sensitivity)
+    df["opex"] = df.fixed_opex + (df.extra_opex if "extra_opex" in df else 0.0)
 
     # battery replacement (sized to the battery in service at that time)
     df["replacement"] = 0.0
@@ -500,10 +522,43 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
         peak_load = max(peak_load, float(load.max()))
         res = _resource_for(resource, y)
         r = dispatch_year(load, res["ghi"], res["tair"], cfg, sz, battery, y)
+        served, unmet = r["served"], r["unmet"]
+        # Backup generator (hybrid sensitivity): runs last, on what solar and
+        # battery leave unserved, up to its rating.
+        gen_kwh, extra_opex = 0.0, 0.0
+        if sz.get("generator_kw"):
+            g = cfg["generator"]
+            gen = np.minimum(unmet, sz["generator_kw"])
+            served, unmet = served + gen, unmet - gen
+            gen_kwh = float(gen.sum())
+            extra_opex = gen_kwh * (g["fuel_l_per_kwh"] * g["fuel_price_per_l"]
+                                    + g["om_per_kwh"])
+        # Anchor (commercial) customer, where the load builder has one: its
+        # share of each hour's served energy is billed at its own rate and
+        # kept out of the household band calculation.
+        t = cfg["tariff"]
+        anchor = getattr(load_builder, "anchor", None)
+        if anchor is not None:
+            a = np.asarray(anchor(y), dtype=float)
+            share = np.divide(a, load, out=np.zeros_like(load, dtype=float),
+                              where=load > 0)
+            served_anchor = served * share
+            served_hh = served - served_anchor
+            rev_anchor = float(served_anchor.sum() * t["anchor_rate_per_kwh"]
+                               * t["collection_rate"])
+        else:
+            served_hh, rev_anchor = served, 0.0
+        rev_hh = tariff_revenue(served_hh, cfg, tariff_mode,
+                                sizing.get("households", sizing.get("connections")))
         annual.append({
             "year": y,
-            "served_kwh": r["served"].sum(),
-            "unmet_kwh": r["unmet"].sum(),
+            "served_kwh": served.sum(),
+            "unmet_kwh": unmet.sum(),
+            "generator_kwh": gen_kwh,
+            "extra_opex": extra_opex,
+            "plant_value": plant_value(cfg, sz),
+            "served_households_kwh": float(served_hh.sum()),
+            "revenue_households": rev_hh,
             "demand_kwh": load.sum(),
             "curtailed_kwh": r["curtailed"].sum(),
             "pv_to_load_kwh": r["pv_to_load"].sum(),
@@ -511,9 +566,7 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
             "peak_load_kw": float(load.max()),
             "battery_fade": r["battery_fade"],
             "balance_residual_kw": r["balance_residual_kw"],
-            "revenue": tariff_revenue(r["served"], cfg, tariff_mode,
-                                      sizing.get("households",
-                                                 sizing.get("connections"))),
+            "revenue": rev_hh + rev_anchor,
             "operating_subsidy": (float(operating_subsidy(y))
                                   if operating_subsidy else 0.0),
             "capex_addition": 0.0,
@@ -549,6 +602,7 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
     metrics["peak_load_kw"] = peak_load
     metrics["max_balance_residual_kw"] = float(df.balance_residual_kw.max())
     metrics["capex_items"] = capex_items
+    metrics["generator_share"] = float(df.generator_kwh.sum() / df.served_kwh.sum())
     return df, metrics
 
 
@@ -564,7 +618,8 @@ def average_billed_rate(cfg, sizing, load_builder, resource, tariff_mode="flat")
     df, _ = simulate(cfg, sizing, load_builder, resource, tariff_mode)
     disc = (1 + cfg["finance"]["discount_rate_real"]) ** df.year.values
     coll = cfg["tariff"]["collection_rate"]
-    return float((df.revenue / disc).sum() / coll / (df.served_kwh / disc).sum())
+    return float((df.revenue_households / disc).sum() / coll
+                 / (df.served_households_kwh / disc).sum())
 
 
 def _copy_cfg(cfg):
@@ -635,9 +690,13 @@ def required_tariff(cfg, sizing, load_builder, resource, target_irr=None,
 def required_operating_subsidy(cfg, sizing, load_builder, resource,
                                tariff_mode="flat", target_irr=None,
                                grant_fraction=0.0, hi=5000.0, tol=0.01):
-    """Annual operating subsidy per connection ($/connection/yr, constant in
-    real terms, escalating with OPEX) that lifts IRR to the target at the
-    REGULATED tariff - the third inverse solver (Phase 3).
+    """Annual operating subsidy per connection ($/connection/yr, the same
+    amount every year in real terms) that lifts IRR to the target at the
+    tariff in cfg - the third inverse solver (Phase 3).
+
+    The stream is LEVEL. It used to escalate with operating cost at 5% a year
+    while the paper called it constant, so its present value and the saving
+    from a capital grant did not match a level annuity.
 
     s6.3 concludes that "the arithmetic points to operating subsidy" without
     pricing it. This prices it. Optionally combined with a capital grant, to
@@ -645,13 +704,12 @@ def required_operating_subsidy(cfg, sizing, load_builder, resource,
     Returns (usd_per_connection_year, irr) or (None, irr_at_hi).
     """
     target = target_irr if target_irr is not None else cfg["finance"]["target_irr"]
-    esc = cfg["opex"]["escalation_rate"]
     conn = sizing["connections"]
     c = _copy_cfg(cfg)
     c["capex"] = {**cfg["capex"], "_grant_fraction": grant_fraction}
 
     def irr_at(s):
-        sub = lambda y: s * conn * (1 + esc) ** (y - 1)
+        sub = lambda y: s * conn
         _, m = simulate(c, sizing, load_builder, resource, tariff_mode,
                         operating_subsidy=sub)
         return m["irr"]
@@ -659,6 +717,9 @@ def required_operating_subsidy(cfg, sizing, load_builder, resource,
     top = irr_at(hi)
     if not (top == top) or top < target:
         return None, top
+    zero = irr_at(0.0)
+    if (zero == zero) and zero >= target:
+        return 0.0, zero                  # viable without a subsidy
     lo = 0.0
     while hi - lo > tol:
         mid = (lo + hi) / 2

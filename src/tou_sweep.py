@@ -48,8 +48,9 @@ def sweep(cfg, res, n, conn, seed=42, phis=(0.3, 0.5), discounts=DISCOUNTS,
                              sizing_kw=sizing_kw, sizing_cache=cache)
             rows.append({"response": response, "phi_nominal": phi,
                          "phi_effective": r["phi_effective"], "discount": d,
-                         "battery_kwh": r["battery_kwh"],
-                         "avoided_battery_kwh": flat["battery_kwh"] - r["battery_kwh"],
+                         "battery_kwh": r["battery_kwh_bought"],
+                         "avoided_battery_kwh": (flat["battery_kwh_bought"]
+                                                 - r["battery_kwh_bought"]),
                          "lcoe": r["lcoe"],
                          "lcoe_change_pct": 100 * (r["lcoe"] / flat["lcoe"] - 1),
                          "npv": r["npv"],

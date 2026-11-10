@@ -1,3 +1,5 @@
-scenario,search_pv_kw,search_battery_kwh,search_lcoe,search_evaluations,grid_pv_kw,grid_battery_kwh,grid_lcoe,grid_evaluations,lcoe_gap_pct,worst_year_unmet,lifetime_unmet
-rwanda pen=1.0 phi=0.0 flat,365,780,1.082355776,120,365,780,1.082355776,5467,0,0.04913070977,0.009477130733
-kenya pen=0.5 phi=0.5 tou,240,500,1.090297856,128,240,500,1.090297856,5467,0,0.04869123708,0.009959677432
+scenario,stage,search_pv_kw,search_battery_kwh,search_lcoe,search_evaluations,grid_pv_kw,grid_battery_kwh,grid_lcoe,grid_evaluations,lcoe_gap_pct,worst_year_unmet,lifetime_unmet
+rwanda pen=1.0 phi=0.0 flat,1 (years 1-10),135,340,0.9492798725,121,135,340,0.9492798725,2907,0,0.04940928578,0.03323730296
+rwanda pen=1.0 phi=0.0 flat,2 (years 11-20),150,380,0.8067078343,,150,380,0.8067078343,1071,0,0.04940928578,0.032492375
+kenya pen=0.5 phi=0.5 tou,1 (years 1-10),100,220,1.010088543,117,100,220,1.010088543,2907,0,0.04531492531,0.02516729364
+kenya pen=0.5 phi=0.5 tou,2 (years 11-20),110,280,0.8467393637,,110,280,0.8467393637,1071,0,0.04849151948,0.02679987405

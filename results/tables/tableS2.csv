@@ -1,0 +1,7 @@
+Step (cumulative),"Rwanda LCOE, no cooking","Rwanda LCOE, full cooking","Rwanda NPV, US$ million","Rwanda subsidy, US$/connection/yr",Rwanda extra per cooking household,"Kenya LCOE, no cooking","Kenya LCOE, full cooking","Kenya NPV, US$ million","Kenya subsidy, US$/connection/yr",Kenya extra per cooking household
+0 first submission,$2.68,$1.08,−1.29,671,368,$1.72,$0.99,−1.39,722,354
+1 operating cost constant in real terms,$2.38,$1.03,−1.22,644,368,$1.57,$0.95,−1.32,695,354
+2 operating cost split into customer and plant parts,$2.32,$1.11,−1.32,690,420,$1.58,$1.02,−1.43,746,403
+3 cooking energy does not grow; appliance demand grows 2% a year,$2.29,$0.83,−0.71,368,153,$1.47,$0.77,−0.76,395,138
+4 two-stage build,$2.21,$0.81,−0.68,348,143,$1.39,$0.74,−0.72,370,131
+5 target return equal to the discount rate (this paper),$2.21,$0.81,−0.68,302,119,$1.39,$0.74,−0.72,321,108

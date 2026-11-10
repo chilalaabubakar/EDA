@@ -1,4 +1,6 @@
-φ,Rwanda storage,Avoided,Rwanda LCOE,Kenya storage,Avoided ,Kenya LCOE
-0.0,780 kWh,0,$1.082,900 kWh,0,$0.993
-0.3,680 kWh,100 kWh (13%),$1.036,760 kWh,140 kWh (16%),$0.939
-0.5,660 kWh,120 kWh (15%),$1.033,680 kWh,220 kWh (24%),$0.922
+Basis,Rwanda kWh/month,Rwanda blended rate,Rwanda factor,Kenya kWh/month,Kenya blended rate,Kenya factor
+"Illustrative, 15 → 60 kWh",15 → 60 kWh,$0.061 → $0.169,2.8×,15 → 60 kWh,$0.094 → $0.128,1.4×
+"Year 1, simulated",6 → 37 kWh,$0.061 → $0.130,2.1×,12 → 43 kWh,$0.094 → $0.128,1.4×
+"Year 5, simulated",7 → 37 kWh,$0.061 → $0.131,2.2×,13 → 44 kWh,$0.094 → $0.128,1.4×
+"Year 10, simulated",8 → 38 kWh,$0.061 → $0.133,2.2×,15 → 45 kWh,$0.094 → $0.128,1.4×
+"Year 20, simulated",9 → 40 kWh,$0.061 → $0.136,2.2×,18 → 48 kWh,$0.094 → $0.128,1.4×

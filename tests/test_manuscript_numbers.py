@@ -110,7 +110,7 @@ def test_table_order_and_negated_claims(synthetic_results, tmp_path):
     """A draft may drop a table (order lists what it keeps) and quote the
     magnitude of a negative result ("-key")."""
     tables, numbers = build_all(synthetic_results)
-    kept = [1, 2, 3, 5, 6]
+    kept = [1, 2, 4]
     p = tmp_path / "subset.docx"
     _write_docx(p, {n: tables[n] for n in kept}, "")
     _, doc_tables = docx_content(p)

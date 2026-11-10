@@ -1,5 +1,6 @@
-Discount rate,Rwanda cost-reflective,Multiple,Kenya cost-reflective,Multiple 
-8%,$1.135,7.0×,$1.040,8.1×
-12%,$1.420,9.0×,$1.304,10.2×
-15%,$1.654,10.7×,$1.519,11.8×
-20%,$2.072,13.8×,$1.905,14.9×
+Tariff,"Rwanda price, US$/kWh","Rwanda bill, US$/month","Rwanda subsidy, US$/connection/yr","Rwanda extra per cooking household, US$/yr","Kenya price, US$/kWh","Kenya bill, US$/month","Kenya subsidy, US$/connection/yr","Kenya extra per cooking household, US$/yr"
+"National tariff, base charges (base scenario)",$0.13,$4.78,302,119,$0.13,$5.45,321,108
+"National tariff, all charges (US$0.20/kWh)",–,–,–,–,$0.20,$8.52,287,90
+"Site tariff, KES 40/kWh (Oloika)",$0.31,$11.40,231,67,$0.31,$13.21,236,55
+"Site tariff, US$0.56/kWh (AMDA model)",$0.56,$20.60,133,−13,$0.56,$23.85,120,−24
+Break-even tariff,$0.90,$32.97,0,−119,$0.82,$34.87,0,−106

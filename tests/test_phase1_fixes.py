@@ -164,8 +164,10 @@ def test_measured_duration_variant_exists_and_differs():
 
 # --------------------------------------------- defect 5: diesel cut, not idle
 def test_diesel_is_gone_from_model_and_config():
-    """Every published scenario ran diesel_kw = 0. The generator, its fuel cost
-    and the fuel-price references were cut rather than left looking live."""
+    """The base case has no generator: the old always-zero diesel inputs were
+    cut rather than left looking live. A backup generator now exists only as a
+    labelled sensitivity (sizing carries generator_kw; cfg["generator"]), and
+    tests/test_review_revision.py checks that it stays out of the base case."""
     import model
     assert not hasattr(model, "DieselGenerator")
     assert "diesel_kw" not in final_cfg.BASE_CFG

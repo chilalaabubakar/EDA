@@ -79,8 +79,8 @@ def fig1_structure(out):
     boxes = {
         "demand": (0.2, 1.6, "Household demand\nRAMP appliances +\ncooking meals (φ)"),
         "dispatch": (2.7, 1.6, "Hourly operation\nsolar, load, battery\n(8,760 h × 20 yr)"),
-        "sizing": (5.2, 1.6, "Least-cost sizing\nunserved demand\n≤ 5% in every year"),
-        "finance": (7.7, 1.6, "Finance\nLCOE, NPV and\nfunding gap"),
+        "sizing": (5.2, 1.6, "Least-cost sizing\ntwo stages; unserved\n≤ 5% in every year"),
+        "finance": (7.7, 1.6, "Finance\nLCOE, NPV and\noperating subsidy"),
     }
     for x, y, t in boxes.values():
         ax.add_patch(plt.Rectangle((x, y), 2.1, 1.2, fc="#E8EEF6",
@@ -97,13 +97,13 @@ def fig1_structure(out):
     inputs = [(1.25, "MTF microdata\n(ownership, dayparts)", "demand"),
               (3.75, "NASA POWER\nsolar and temperature", "dispatch"),
               (6.25, "AMDA / SEforALL\ncost benchmarks", "sizing"),
-              (8.75, "RURA / EPRA\ntariff schedules", "finance")]
+              (8.75, "National and site\ntariff scenarios", "finance")]
     for x, t, b in inputs:
         ax.text(x, 3.75, t, ha="center", va="center", fontsize=7.5, color=INK2)
         ax.annotate("", (x, 2.8), (x, 3.4), arrowprops=dict(
             arrowstyle="-|>", color=INK2, lw=1.0, linestyle=(0, (3, 2)),
             mutation_scale=10))
-    ax.text(5.0, 1.15, "scenarios: share cooking × φ × tariff × discount × random seed",
+    ax.text(5.0, 1.15, "scenarios: share cooking × share of supper moved (φ) × tariff × random seed",
             ha="center", fontsize=8, color=INK2, style="italic")
     save(fig, out, "fig1_model_structure")
 
@@ -126,54 +126,10 @@ def fig2_cooking(out, n=300, seeds=range(10)):
     save(fig, out, "fig2_cooking_profile")
 
 
-# ------------------------------------------------------------------ figure 3
-def fig3_penetration(S, out):
-    flat = S[(S.tariff == "flat") & S.feasible].drop_duplicates(["site", "penetration"])
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.8))
-    for i, site in enumerate(SITE):
-        g = flat[flat.site == site].sort_values("penetration")
-        x = 100 * g.penetration
-        dy = 7 if i == 0 else -7          # dodge: end values can coincide
-        axes[0].plot(x, g.lcoe, **style(i))
-        label_end(axes[0], x.iloc[-1], g.lcoe.iloc[-1], SITE[site].split()[0], i, dy=dy)
-        axes[1].plot(x, g.battery_kwh, **style(i))
-        label_end(axes[1], x.iloc[-1], g.battery_kwh.iloc[-1], SITE[site].split()[0], i, dy=dy)
-    axes[0].set_ylabel("LCOE, US$/kWh"); axes[0].set_title("(a) levelised cost", loc="left")
-    axes[1].set_ylabel("storage, kWh"); axes[1].set_title("(b) least-cost storage", loc="left")
-    for ax in axes:
-        ax.set_xlabel("eCooking penetration, %"); ax.set_xticks([0, 50, 100])
-        ax.set_xlim(-5, 125); ax.set_ylim(bottom=0)
-    axes[0].legend([SITE[s] for s in SITE], loc="upper right", fontsize=7.5)
-    fig.tight_layout()
-    save(fig, out, "fig3_penetration")
-
-
-# ------------------------------------------------------------------ figure 4
-def fig4_substitution(T, out):
-    T = T[T.response == "step"]
-    fig, axes = plt.subplots(1, 2, figsize=(6.8, 2.8), sharey=True)
-    for ax, site in zip(axes, SITE):
-        g = T[T.site == site]
-        for i, phi in enumerate(sorted(g.phi_nominal.unique())):
-            h = g[g.phi_nominal == phi].sort_values("discount")
-            ax.plot(100 * h.discount, h.avoided_battery_kwh, drawstyle="steps-post",
-                    color=SERIES[i], linestyle=STYLES[i], marker=MARKERS[i],
-                    markersize=4.5, mec="white", mew=0.8)
-            label_end(ax, 100 * h.discount.iloc[-1], h.avoided_battery_kwh.iloc[-1],
-                      f"φ = {phi:.1f}", i)
-        ax.set_title(SITE[site], loc="left")
-        ax.set_xlabel("daytime discount, US¢/kWh")
-        ax.set_xlim(-0.3, 100 * g.discount.max() + 3.5)
-    axes[0].set_ylabel("avoided storage, kWh")
-    axes[0].set_ylim(bottom=0)
-    axes[0].legend([f"φ = {p:.1f}" for p in sorted(T.phi_nominal.unique())],
-                   loc="center right", fontsize=7.5)
-    fig.tight_layout()
-    save(fig, out, "fig4_substitution")
-
-
 # ------------------------------------------------------------------ figure 5
 def fig5_bands(B, out):
+    """Average price per unit against monthly use, with the simulated average
+    household marked without cooking (open marker) and with it (filled)."""
     from final_cfg import country_cfg
     from model import _band_rate
     kwh = np.linspace(1, 120, 480)
@@ -182,120 +138,119 @@ def fig5_bands(B, out):
         t = country_cfg(site)["tariff"]
         ax.plot(kwh, [_band_rate(k, t) for k in kwh], color=SERIES[i],
                 linestyle=STYLES[i], lw=2.4)
-        sim = B[(B.site == site) & (B.basis == "simulated")]
-        for _, r in sim[sim.year.isin([1, 20])].iterrows():
-            ax.plot(r.kwh_full_ecooking, r.rate_full_ecooking, marker=MARKERS[i],
-                    color=SERIES[i], linestyle="none", mec="black", mew=1.0, ms=7,
-                    zorder=5)
-            ax.annotate(f"yr {int(r.year)}", (r.kwh_full_ecooking, r.rate_full_ecooking),
-                        xytext=(-26, 6) if i == 0 else (4, -13), textcoords="offset points",
-                        fontsize=8, color=SERIES[i])
+        r = B[(B.site == site) & (B.basis == "simulated") & (B.year == 1)].iloc[0]
+        a = (r.kwh_no_ecooking, r.rate_no_ecooking)
+        b = (r.kwh_full_ecooking, r.rate_full_ecooking)
+        ax.plot(*a, marker=MARKERS[i], color="white", linestyle="none", mec=SERIES[i],
+                mew=1.8, ms=7, zorder=5)
+        ax.plot(*b, marker=MARKERS[i], color=SERIES[i], linestyle="none", mec="black",
+                mew=1.0, ms=7.5, zorder=5)
+        ax.annotate("", b, a, arrowprops=dict(arrowstyle="-|>", color=SERIES[i], lw=1.1,
+                                              shrinkA=6, shrinkB=6, alpha=0.9,
+                                              connectionstyle="arc3,rad=-0.25" if i == 0
+                                              else "arc3,rad=0.25"))
         label_end(ax, kwh[-1], _band_rate(kwh[-1], t),
                   ["Rwanda\n(block tariff)", "Kenya\n(single band)"][i], i)
-    ax.set_xlabel("household consumption, kWh/month")
-    ax.set_ylabel("blended tariff, US$/kWh")
+    ax.plot([], [], marker="o", color="white", mec=INK, mew=1.6, ms=6.5, linestyle="none",
+            label="average household, no cooking")
+    ax.plot([], [], marker="o", color=INK2, mec="black", ms=6.5, linestyle="none",
+            label="average household, all meals cooked")
+    ax.legend(loc="lower right", fontsize=7.5)
+    ax.set_xlabel("household use, kWh/month")
+    ax.set_ylabel("average price paid, US$/kWh")
     ax.set_xlim(0, 120); ax.set_ylim(0, 0.235)
     ax.set_xticks(range(0, 121, 20))
     save(fig, out, "fig5_blended_tariff")
 
 
-# ------------------------------------------------------------------ figure 6
-def fig6_viability(D, out):
-    from final_cfg import country_cfg
-    fig, ax = plt.subplots(figsize=(5.2, 3.0))
-    for i, site in enumerate(SITE):
-        g = D[D.site == site].sort_values("discount_rate")
-        ax.plot(100 * g.discount_rate, g.cost_reflective_tariff, **style(i))
-        label_end(ax, 100 * g.discount_rate.iloc[-1], g.cost_reflective_tariff.iloc[-1],
-                  f"{SITE[site].split()[0]}, cost-reflective", i, dy=6 if i == 0 else -6)
-        reg = country_cfg(site)["tariff"]["flat_rate_per_kwh"]
-        ax.axhline(reg, color=SERIES[i], lw=1.0, linestyle=(0, (1, 2)))
-        ax.annotate(f"{SITE[site].split()[0]} regulated ${reg:.3f}", (7.3, reg),
-                    xytext=(0, 3 if i == 0 else -9), textcoords="offset points",
-                    fontsize=7, color=INK2)
-    from matplotlib.ticker import FixedLocator, FuncFormatter, NullLocator
-    ax.set_yscale("log")
-    ax.yaxis.set_major_locator(FixedLocator([0.1, 0.2, 0.5, 1, 2, 5]))
-    ax.yaxis.set_minor_locator(NullLocator())
-    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"${v:g}"))
-    ax.set_ylim(0.1, max(D.cost_reflective_tariff.max() * 1.6, 2))
-    ax.set_xlabel("real discount rate, %")
-    ax.set_ylabel("tariff, US$/kWh (log scale)")
-    ax.set_xlim(7, 29)
-    save(fig, out, "fig6_viability")
+# ----------------------------------------------------------- sensitivity
+SENS_LABEL = {"Capital cost": "Capital cost, −30% / +30%",
+              "Operating cost": "Operating cost, −50% / +50%",
+              "Discount rate": "Discount rate, 8% / 20%",
+              "Battery cost": "Battery, US$150 / 450 per kWh",
+              "Appliance demand growth": "Appliance growth, 0 / 5% a year",
+              "Energy per meal": "Energy per meal, 0.25 / 0.45 kWh",
+              "Bills collected": "Bills collected, 100% / 80%",
+              "Unserved demand allowed": "Unserved demand, 10% / 2%",
+              "All cost inputs together": "Capital, operating, discount\nrate and collection together"}
 
 
-# ------------------------------------------------- journal figures (Phase 4b)
-def fig_tou_operator(T, out, phi=0.5):
-    """(a) avoided storage and (b) operator NPV gain against the daytime
-    discount, full penetration, one phi. Shows the step response: storage
-    avoided is flat in the discount, the revenue given up is not."""
-    T = T[(T.response == "step") & (T.phi_nominal == phi)]
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.0))
+def fig_sensitivity(X, out):
+    """Range of (a) the levelised cost with full cooking and (b) the extra
+    subsidy per cooking household when each input moves between its low and
+    high value, re-sizing the system each time. Vertical lines mark the base
+    case. Source: sensitivity.csv."""
+    base = X[X.side == "base"].set_index("site")
+    V = X[X.side != "base"]
+    q_b = "incremental_usd_per_cooking_hh_year"
+    order = (V[V.site == "rwanda"].groupby("parameter")[q_b]
+             .agg(lambda v: v.max() - v.min()).sort_values().index.tolist())
+    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.5), sharey=True,
+                             gridspec_kw={"width_ratios": [1, 1]})
+    h = 0.34
+    for ax, q, title, xlabel in (
+            (axes[0], "lcoe_full", "(a) LCOE, all households cooking", "LCOE, US$/kWh"),
+            (axes[1], q_b, "(b) Extra subsidy per cooking household", "US$ per household per year")):
+        for i, site in enumerate(SITE):
+            g = V[V.site == site]
+            for y, name in enumerate(order):
+                v = g[g.parameter == name][q]
+                ax.barh(y + (0.5 - i) * (h + 0.04), v.max() - v.min(), h, left=v.min(),
+                        color=SERIES[i], edgecolor="black", linewidth=0.7,
+                        hatch="///" if i else None, alpha=0.92 if i == 0 else 0.85)
+            ax.axvline(base.loc[site, q], color=SERIES[i], lw=1.3,
+                       ls=STYLES[i], zorder=0)
+        ax.set_title(title, loc="left", fontsize=9.5)
+        ax.set_xlabel(xlabel)
+        ax.set_xlim(left=0)
+    axes[0].set_yticks(range(len(order)))
+    axes[0].set_yticklabels([SENS_LABEL.get(n, n) for n in order], fontsize=8)
+    from matplotlib.patches import Patch
+    axes[1].legend([Patch(facecolor=SERIES[0], edgecolor="black"),
+                    Patch(facecolor=SERIES[1], edgecolor="black", hatch="///")],
+                   ["Rwanda", "Kenya"], fontsize=8, loc="lower right")
+    save(fig, out, "fig_sensitivity")
+
+
+# ------------------------------------------------------- daytime discount
+def fig_daytime(E, out):
+    """Effect of moving a share of supper cooking to the afternoon, full
+    adoption: mean of the seed ensemble with the 95% interval of the mean.
+    (a) batteries bought over the project, saving against the flat tariff;
+    (b) the largest daytime discount the operator can give before the saving
+    is used up; (c) change in the cooking peak. Source: ensemble_summary.csv."""
+    def series(site, q):
+        g = E[(E.site == site) & E.quantity.str.startswith(q + "_phi")].copy()
+        g["phi"] = g.quantity.str[-2:].astype(int) / 100.0
+        return g.sort_values("phi")
+    fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.7))
     for i, site in enumerate(SITE):
-        g = T[T.site == site].sort_values("discount")
-        x = 100 * g.discount
-        axes[0].plot(x, g.avoided_battery_kwh, drawstyle="steps-post",
-                     color=SERIES[i], linestyle=STYLES[i])
-        axes[0].plot(x, g.avoided_battery_kwh, linestyle="none", marker=MARKERS[i],
-                     color=SERIES[i], markersize=5, mec="black", mew=0.6)
-        pos = g[g.discount > 0]
-        axes[1].plot(100 * pos.discount, pos.operator_npv_gain / 1000, **style(i),
-                     markersize=5, mec="black", mew=0.6)
         name = SITE[site].split()[0]
-        label_end(axes[0], x.iloc[-1], g.avoided_battery_kwh.iloc[-1], name, i,
-                  dy=6 if i else -6)
-        label_end(axes[1], 100 * pos.discount.iloc[-1],
-                  pos.operator_npv_gain.iloc[-1] / 1000, name, i)
-    axes[0].set_title("(a) storage avoided", loc="left")
-    axes[0].set_ylabel("kWh")
-    axes[0].set_ylim(0, T.avoided_battery_kwh.max() * 1.25)
-    axes[1].set_title("(b) change in operator NPV", loc="left")
-    axes[1].set_ylabel("US$ thousand")
-    axes[1].axhline(0, color=INK2, lw=1.0, ls=(0, (4, 3)))
-    axes[1].set_ylim(bottom=-5)
+        for ax, q, scale in ((axes[0], "avoided_battery_pct", 1.0),
+                             (axes[1], "break_even_discount", 100.0)):
+            g = series(site, q)
+            ax.fill_between(g.phi, scale * g.ci95_lo, scale * g.ci95_hi, color=SERIES[i],
+                            alpha=0.2, lw=0)
+            ax.plot(g.phi, scale * g["mean"], **style(i), markersize=5, mec="black", mew=0.6)
+            label_end(ax, g.phi.iloc[-1], scale * g["mean"].iloc[-1], name, i,
+                      dy=5 if i else -5)
+    g = series("rwanda", "peak_cooking_increase_pct")     # same cooking in both villages
+    axes[2].fill_between(g.phi, g.ci95_lo, g.ci95_hi, color=SERIES[2], alpha=0.2, lw=0)
+    axes[2].plot(g.phi, g["mean"], **style(2), markersize=5, mec="black", mew=0.6)
+    axes[2].axhline(0, color=INK2, lw=1.0, ls=(0, (4, 3)))
+    axes[0].set_title("(a) Battery saved", loc="left", fontsize=9.5)
+    axes[0].set_ylabel("% of battery capacity bought")
+    axes[1].set_title("(b) Break-even discount", loc="left", fontsize=9.5)
+    axes[1].set_ylabel("US cents/kWh")
+    axes[2].set_title("(c) Cooking peak", loc="left", fontsize=9.5)
+    axes[2].set_ylabel("change, %")
     for ax in axes:
-        ax.set_xlabel("daytime discount, US cents/kWh")
-        ax.set_xlim(-0.3, 100 * T.discount.max() + 3.2)
-    fig.tight_layout()
-    save(fig, out, "fig_tou_operator")
-
-
-def fig_esmap(W, out):
-    """Cumulative LCOE bridge: three assumptions changed in turn (10% discount
-    rate, no reserve for demand growth, twice the demand per connection)."""
-    steps = ["This\nstudy", "Discount\nrate 10%", "No growth\nreserve",
-             "Demand\nx2", "All\nthree"]
-    fig, axes = plt.subplots(1, 2, figsize=(7.2, 3.2), sharey=True)
-    edge = dict(edgecolor="black", linewidth=1.0, width=0.64)
-    for ax, site, col in zip(axes, SITE, SERIES):
-        v = W[W.site == site].lcoe.values
-        x = np.arange(len(v) + 1)
-        ax.bar(0, v[0], color=PALETTE["neutral"], **edge)
-        for i in range(1, len(v)):
-            ax.bar(i, v[i] - v[i - 1], bottom=v[i - 1], color=PALETTE["green_2"],
-                   hatch="///", **edge)
-            ax.annotate(f"\u2212{v[i - 1] - v[i]:.2f}", (i, v[i - 1]), xytext=(0, 3),
-                        textcoords="offset points", ha="center", fontsize=8.5)
-            ax.plot([i - 1.32, i - 0.32], [v[i - 1], v[i - 1]], color=INK2, lw=0.8,
-                    ls=":")
-        ax.bar(len(v), v[-1], color=col, **edge)
-        ax.plot([len(v) - 1.32, len(v) - 0.32], [v[-1], v[-1]], color=INK2, lw=0.8, ls=":")
-        for i, val in ((0, v[0]), (len(v), v[-1])):
-            ax.annotate(f"${val:.2f}", (i, val), xytext=(0, 3), textcoords="offset points",
-                        ha="center", fontsize=9, fontweight="bold")
-        ax.axhline(0.55, color=PALETTE["red_strong"], lw=1.2, ls=(0, (4, 3)), zorder=0)
-        ax.annotate("ESMAP reference $0.55", (2.0, 0.55), xytext=(0, -12),
-                    textcoords="offset points", ha="center", fontsize=8,
-                    color=PALETTE["red_strong"])
-        ax.set_axisbelow(True)
-        ax.set_xticks(x)
-        ax.set_xticklabels(steps, fontsize=8)
-        ax.set_title(SITE[site], loc="left", color=col)
-    axes[0].set_ylabel("LCOE, US$/kWh")
-    axes[0].set_ylim(0, 1.25)
-    fig.tight_layout()
-    save(fig, out, "fig_esmap")
+        ax.set_xlabel("share of supper cooking moved, φ")
+        ax.set_xticks([0.1, 0.2, 0.3, 0.4, 0.5])
+        ax.set_xlim(0.07, 0.62 if ax is not axes[2] else 0.53)
+    for ax in axes[:2]:
+        ax.set_ylim(bottom=0)
+    save(fig, out, "fig_daytime")
 
 
 def fig_cost_vs_price(CP, out):
@@ -321,12 +276,12 @@ def fig_cost_vs_price(CP, out):
     a.set_xticklabels(lab)
     a.set_xlabel("Households cooking with electricity")
     a.set_ylabel("LCOE, US$/kWh")
-    a.set_ylim(0, 3.0)
+    a.set_ylim(0, CP.lcoe.max() * 1.18)
     a.set_title("(a) Cost of supply per kWh", loc="left")
     a.legend([Patch(facecolor=PALETTE["neutral"], hatch="///", edgecolor="black"),
               Patch(facecolor=SERIES[0], edgecolor="black"),
               Patch(facecolor=SERIES[1], edgecolor="black")],
-             ["Per connection: connection,\nsoft cost, operation",
+             ["Per connection: connection, its\nsoft cost, customer operation",
               "Solar, battery, inverter (Rwanda)", "Solar, battery, inverter (Kenya)"],
              fontsize=7, loc="upper right")
     for i, (site, col) in enumerate(zip(SITE, SERIES)):
@@ -344,7 +299,7 @@ def fig_cost_vs_price(CP, out):
     b.set_xticklabels(lab)
     b.set_xlabel("Households cooking with electricity")
     b.set_ylabel("Average price paid, US$/kWh")
-    b.set_ylim(0, 0.19)
+    b.set_ylim(0, CP.avg_price_paid.max() * 1.45)
     b.set_xlim(-0.3, len(pens) - 0.7)
     b.set_title("(b) Price paid per kWh (labels: LCOE ÷ price)", loc="left", fontsize=9.5)
     b.legend(fontsize=7.5, loc="upper left")
@@ -354,19 +309,16 @@ def fig_cost_vs_price(CP, out):
 def build(results, out=None):
     R = Path(results)
     out = Path(out or R / "figures")
-    if (R / "cost_vs_price.csv").exists():
-        fig_cost_vs_price(pd.read_csv(R / "cost_vs_price.csv"), out)
+    have = lambda f: (R / f).exists()
     fig1_structure(out)
     fig2_cooking(out)
-    fig3_penetration(pd.read_csv(R / "scenarios_both.csv"), out)
-    if (R / "tou_sweep.csv").exists():
-        fig4_substitution(pd.read_csv(R / "tou_sweep.csv"), out)
+    if have("cost_vs_price.csv"):
+        fig_cost_vs_price(pd.read_csv(R / "cost_vs_price.csv"), out)
+    if have("sensitivity.csv"):
+        fig_sensitivity(pd.read_csv(R / "sensitivity.csv"), out)
+    if have("ensemble_summary.csv"):
+        fig_daytime(pd.read_csv(R / "ensemble_summary.csv"), out)
     fig5_bands(pd.read_csv(R / "tariff_band_recomputed.csv"), out)
-    fig6_viability(pd.read_csv(R / "discount_sweep.csv"), out)
-    if (R / "tou_sweep.csv").exists():
-        fig_tou_operator(pd.read_csv(R / "tou_sweep.csv"), out)
-    if (R / "esmap_waterfall.csv").exists():
-        fig_esmap(pd.read_csv(R / "esmap_waterfall.csv"), out)
     return out
 
 

@@ -18,7 +18,7 @@ import pandas as pd
 
 from model import _pv_dc
 from run_scenarios import make_load_builder
-from sizing import size_system
+from expansion import size_design
 
 RINGITI_ACTUAL = {
     "source": "TaiyangNews 2018; Renewvia Energy minigrid sites",
@@ -48,10 +48,11 @@ def run(cfg, res, seed=42, actual=RINGITI_ACTUAL, penetrations=(0.0, 0.5, 1.0),
     rows = []
     for pen in penetrations:
         b = make_load_builder(cfg, n, pen, 0.0, seed)
-        s, m, _ = size_system(cfg, b, res, n, **(sizing_kw or {}))
+        s, m = size_design(cfg, b, res, n, **(sizing_kw or {}))
         rows.append({"basis": f"model, eCooking {pen:.0%}", "connections": n,
                      "pv_kw": s["pv_kw"], "battery_kwh": s["battery_kwh"],
                      "inverter_kw": s.get("inverter_kw"),
+                     "pv_kw_final": s["stages"][-1]["pv_kw"] if s.get("stages") else s["pv_kw"],
                      "w_per_connection": 1000 * s["pv_kw"] / n,
                      "kwh_storage_per_kwp": s["battery_kwh"] / s["pv_kw"],
                      "lcoe": m["lcoe"],

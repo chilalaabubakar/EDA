@@ -1,5 +1,7 @@
-Metric,Model,MECS measured
-Diversity factor (average profile),9.74,"Kenya 9.75, Tanzania 13.52, Ghana 13.00"
-Peak hour,20:00,Supper peak 19:00–21:00
-Peak load per household,103 W (1 kW EPC),205 W equivalent (2 kW induction)
-Daily cooking energy,1.00 kWh,1.30 kWh (electricity-only households)
+Quantity,Model,Measured,Status
+Diversity factor of cooking,9.74,9.75 (Kenya),Calibration target
+Hour of the cooking peak,20:00,19:00–21:00,Input
+Peak cooking load per household,103 W (1 kW cooker),205 W (2 kW stove),Follows from the diversity factor
+Daily cooking energy per household,1.00 kWh,1.30 kWh,Independent check
+"Appliance use per household, Kenya",12 kWh/month,18 kWh/month,Independent check
+"Solar capacity per customer without cooking, Ringiti",179 W,143 W installed,Independent check

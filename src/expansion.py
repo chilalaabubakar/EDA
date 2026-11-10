@@ -105,6 +105,25 @@ def size_staged(cfg, builder, res, connections, split_year=None, pv_step=5.0,
     return best
 
 
+def size_design(cfg, builder, res, connections, **kw):
+    """Least-cost design for the build named in cfg['sizing']['build'].
+
+    "staged" (base case): built for years 1-10, enlarged when the battery is
+    replaced. "single": one plant sized for the worst of the 20 years.
+    Returns (sizing, metrics), or (None, None) if nothing is feasible. Metrics
+    are computed under cfg['_tariff_mode'].
+    """
+    mode = cfg.get("_tariff_mode", "flat")
+    if cfg.get("sizing", {}).get("build", "single") == "staged":
+        s = size_staged(cfg, builder, res, connections, sizing_kw=kw)
+    else:
+        s, _, _ = size_system(cfg, builder, res, connections, **kw)
+    if s is None:
+        return None, None
+    _, m = simulate(cfg, s, builder, res, tariff_mode=mode)
+    return s, m
+
+
 def run(cfg, builder, res, connections, sizing_kw=None):
     rows = design_year_sensitivity(cfg, builder, res, connections,
                                    sizing_kw=sizing_kw)

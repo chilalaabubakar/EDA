@@ -84,6 +84,11 @@ def validation_summary(n_households=300, seeds=range(10), params=None):
             "peak_hour": int(prof.argmax()),
             "peak_w_per_hh": 1000 * prof.max() / n_households,
             "daily_kwh_per_hh": L.sum() / 365 / n_households,
+            # energy per meal as simulated: the 20-minute minimum event
+            # lengthens short meals, so this is above kwh_per_meal_mean
+            "kwh_per_meal_simulated": L.sum() / 365 / n_households / p.meals_per_day,
+            "kwh_per_meal_drawn": p.kwh_per_meal_mean,
+            "meals_per_day": p.meals_per_day,
             "night_min_22_05": float(np.r_[prof[22:], prof[:5]].max()),
         })
     return pd.DataFrame(rows)

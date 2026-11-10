@@ -12,22 +12,23 @@ import pandas as pd
 
 from bands import _band_rate, monthly_kwh_per_household
 from final_cfg import country_cfg
-from model import average_billed_rate, required_tariff
+from model import average_billed_rate, required_operating_subsidy, required_tariff
 import operating_subsidy
 from run_scenarios import make_load_builder, run, substitution_frontier
 from viability import sizing_from_row
 
 SOURCES = {"m3": "M3 asset flags", "core": "core multi-select (headline)",
            "core_2022": "core, five more years of growth"}
-# The survey ran 2016-18; five years of the model's own 5% a year demand growth
-# brings it to 2022. Rural ownership did rise: television 26.9% (2019 census,
-# KNBS Vol. IV Table 2.36) to 38% (2022 KDHS summary report), radio 58.5% to 62%.
+# The survey ran 2016-18; five years of ownership growth at 5% a year brings
+# it to 2022. Rural ownership did rise: television 26.9% (2019 census, KNBS
+# Vol. IV Table 2.36) to 38% (2022 KDHS summary report), radio 58.5% to 62%.
 SURVEY_AGE_YEARS = 5
+OWNERSHIP_GROWTH = 0.05
 
 
 def _aged(cfg, years):
     import copy
-    g = (1 + cfg["demand"]["annual_growth_rate"]) ** years
+    g = (1 + OWNERSHIP_GROWTH) ** years
     out = copy.deepcopy(cfg)
     out["appliances"] = {k: (min(1.0, v[0] * g),) + tuple(v[1:])
                          for k, v in cfg["appliances"].items()}
@@ -59,6 +60,8 @@ def headline_for(cfg, resource, n_households, connections, seed=42):
     tar, _ = required_tariff(cfg, sizing, b1, resource)
     reg = average_billed_rate(cfg, sizing, b1, resource)
     sub = operating_subsidy.cost(cfg, sizing, b1, resource, n_households)
+    sub0, _ = required_operating_subsidy(
+        cfg, sizing_from_row(flat.iloc[0], connections, n_households), b0, resource)
     t = cfg["tariff"]
     kwh0 = monthly_kwh_per_household(b0, 1, n_households)
     kwh1 = monthly_kwh_per_household(b1, 1, n_households)
@@ -72,10 +75,11 @@ def headline_for(cfg, resource, n_households, connections, seed=42):
         "lcoe_no_cooking": lo.lcoe, "lcoe_half": flat.loc[0.5].lcoe if 0.5 in flat.index else None,
         "lcoe_full": hi.lcoe,
         "lcoe_reduction_pct": 100 * (1 - hi.lcoe / lo.lcoe),
-        "battery_avoided_pct_phi_max": top.avoided_battery_pct,
+        "battery_avoided_pct_phi_max": top.avoided_battery_bought_pct,
         "tou_lcoe_change_pct": top.lcoe_change_pct,
         "cost_reflective_multiple": tar / reg if tar else None,
         "opsub_usd_per_connection_year": sub.get("opsub_grant0_usd_per_conn_year"),
+        "incremental_usd_per_cooking_hh_year": sub.get("opsub_grant0_usd_per_conn_year") - sub0,
         "band_factor_year1": _band_rate(kwh1, t) / _band_rate(kwh0, t),
     }
 

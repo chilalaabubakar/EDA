@@ -224,7 +224,7 @@ def test_sensitivity_cases_move_the_right_inputs(cfg):
     import sensitivity as S
     names = [c[0] for c in S.cases(cfg)]
     for needed in ("Capital cost", "Appliance demand growth", "Bills collected",
-                   "Energy per meal", "Discount rate"):
+                   "Cooking energy", "Discount rate"):
         assert needed in names
     lo = dict((c[0], c[2][0]) for c in S.cases(cfg))
     assert lo["Capital cost"]["capex"]["pv_per_kw"] == pytest.approx(0.7 * cfg["capex"]["pv_per_kw"])

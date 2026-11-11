@@ -1,6 +1,65 @@
 # Revision plan: status, findings, and manuscript changes
 
-## Current results (13 Oct 2026, second update)
+## Review revision (11 Nov 2026): current base case and results
+
+A peer review of the first submission found the paper clear and transparent
+but judged that the headline results rested on a few assumptions that would
+not survive scrutiny. The model, the analyses and the paper were revised. This
+section is the current state; everything below it records earlier stages and
+its numbers are superseded.
+
+### What changed, by review point
+
+| Review point | Change | Code and test |
+|---|---|---|
+| 1. The "regulated tariff" premise is weak: private Kenyan mini-grids charge site-specific tariffs | The national tariff is a policy scenario (what Kenya Power's public mini-grids charge). Added: Kenya's all-in national tariff (US$0.20/kWh), KES 40/kWh (Oloika), US$0.56/kWh (AMDA model of private Kenyan mini-grids) and the break-even tariff | `viability.tariff_scenarios`, `SITE_TARIFFS`; step `tariff_scenarios`; `test_a_higher_site_tariff_shrinks_the_subsidy_and_raises_the_bill` |
+| 2. Tariff not chosen jointly with size; no price response | No claim of a joint choice. Adoption is a scenario input. Each tariff is reported with the household bill it implies. The old NPV-under-a-discount figure is replaced by the largest discount the battery saving can pay for | `ensemble.py` (`break_even_discount_phi*`); `test_break_even_discount_uses_up_the_gain` |
+| 3. LCOE is the wrong measure of the burden | New measure: extra operating subsidy per cooking household, reported with the subsidy at 0, 50 and 100% cooking; carbon cost computed on that increment | `operating_subsidy.by_adoption`, `carbon`; `test_incremental_subsidy_per_cooking_household`, `test_carbon_uses_the_increment_and_two_wood_estimates` |
+| 4. Base case built to be expensive | Two-stage build is the base case; operating cost split into a customer part and a plant part; single stage, anchor load and backup generator tested; median-weather-year sizing reported | `expansion.size_design`, `model.plant_value`, `sensitivity.structural`; `test_base_case_is_a_two_stage_build`, `test_operating_cost_grows_with_the_plant_and_not_with_time`, `test_backup_generator_serves_what_solar_and_battery_cannot`, `test_anchor_customer_is_billed_at_its_own_rate` |
+| 5. 5% a year growth applied to cooking | Cooking energy per household does not grow; appliance demand grows 2% a year (0 and 5% tested) | `run_scenarios.make_load_builder`; `test_cooking_energy_does_not_grow` |
+| 6. Circular validation | Table 2 labels each row as calibration target, input or independent check; model compared with the Ringiti plant and with Kenyan billing records | `manuscript_tables.table2`, `ringiti.py`; `test_table2_separates_calibration_from_checks` |
+| 7. Uncertainty misstated | One-at-a-time sensitivity with re-sizing for eight inputs and a combined case; seed intervals described as sampling noise only | `sensitivity.one_at_a_time`; step `sensitivity`; `test_sensitivity_cases_move_the_right_inputs` |
+| Numbers not reconciled | Subsidy is level in real terms (it rose 5% a year while the text called it constant); target return equals the discount rate; no real cost escalation; the 20-minute minimum meal explains 1.00 kWh a day; figure and text use the same 24 seeds; firewood on two bases | `model.required_operating_subsidy`; `test_subsidy_is_level_and_closes_the_loss`, `test_break_even_tariff_is_cost_over_collection`, `test_simulated_meal_energy_exceeds_the_drawn_mean` |
+
+`sensitivity.bridge` re-runs the base case of the first submission and applies
+the changes one at a time (`results/bridge.csv`, `tables/tableR1.csv`). Step 0
+reproduces the first submission (`test_previous_base_case_is_recoverable`).
+
+### Current results (reference seed unless stated)
+
+| Result | Rwanda | Kenya |
+|---|---|---|
+| LCOE, 0 → 100% cooking | $2.21 → $0.81 (−63%) | $1.39 → $0.74 (−47%) |
+| Least-cost system, 100% cooking (stage 1 → stage 2) | 135 → 150 kW, 340 → 380 kWh | 145 → 160 kW, 400 → 460 kWh |
+| Solar output spilled, 0% / 100% cooking | 28% / 21% | 29% / 23% |
+| Operator's NPV at the national tariff, 0 → 100% cooking | −$0.41M → −$0.68M (+65%) | −$0.48M → −$0.72M (+51%) |
+| Operating subsidy per connection per year, 0 / 50 / 100% cooking | $184 / $253 / $302 | $212 / $271 / $321 |
+| Extra subsidy per cooking household per year (24-seed mean) | $119 ($120) | $108 ($110) |
+| Cost of supplying cooking energy / price paid for it | $0.47 / $0.14 per kWh | $0.43 / $0.14 per kWh |
+| Extra subsidy per tonne of CO2 avoided | $189 to $1,512 (useful energy); $42 to $340 (CDM default) | $172 to $1,380; $39 to $310 |
+| Break-even tariff, 12% (multiple of price paid) | $0.90 (6.9×) | $0.82 (6.4×) |
+| Subsidy / extra per cooking household at KES 40/kWh | $231 / $67 | $236 / $55 |
+| Subsidy / extra per cooking household at US$0.56/kWh | $133 / −$13 | $120 / −$24 |
+| Subsidy with a 50% / 95% capital grant | $179 / $68 | $188 / $68 |
+| Price rise for a cooking household, year 1 / year 20 | 2.1× / 2.2× | 1.4× / 1.4× |
+| Batteries saved, half of supper cooking moved (24 seeds) | 15% (13 to 16) | 23% (22 to 23) |
+| Break-even daytime discount, by share moved | 3.6 to 8.7 ¢/kWh | 3.7 to 11.4 ¢/kWh |
+| Cooking peak, 10 to 20% moved / 50% moved | −9 to −7% / +32% | same |
+| Extra subsidy per cooking household: single inputs / cost inputs together | $69 to $211 / $36 to $273 | $62 to $223 / $31 to $253 |
+| Extra subsidy per cooking household across alternative designs | $92 to $131 | $86 to $121 |
+| Median-weather-year sizing: LCOE / years breaching 5% | −2% / 7 of 20 | −2% / 4 of 20 |
+| Model solar per customer vs installed Ringiti, no cooking | | 179 W vs 143 W |
+
+### Still open (author)
+
+* Affiliation, corresponding address, funding statement, competing-interest
+  statement and the declaration on the use of AI tools in the manuscript.
+* Zenodo DOI for the data-availability statement.
+* No measured price response of electric cooking on mini-grids was found, so
+  adoption stays a scenario input. Diesel prices on the islands are not
+  documented, so the generator is a sensitivity case.
+
+## Results at the first submission (13 Oct 2026, second update)
 
 Changes since the first full run below:
 

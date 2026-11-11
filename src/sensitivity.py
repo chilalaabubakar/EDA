@@ -7,7 +7,7 @@ under:
 
   one_at_a_time()  a low and a high value of each uncertain input
                    (capital cost, operating cost, discount rate, appliance
-                   demand growth, energy per meal, collection rate, battery
+                   demand growth, cooking energy, collection rate, battery
                    cost, the unserved-demand limit), and both ends together
 
   structural()     different designs of the system or the village: a single-
@@ -155,7 +155,11 @@ def cases(cfg):
          "US$450/kWh", (_set(cfg, "capex", battery_per_kwh=450.0), {})),
         ("Appliance demand growth", "none", (_set(cfg, "demand", annual_growth_rate=0.0), {}),
          "5% a year", (_set(cfg, "demand", annual_growth_rate=0.05), {})),
-        ("Energy per meal", "0.25 kWh", (cfg, meal(0.25)), "0.45 kWh", (cfg, meal(0.45))),
+        # Mean energy drawn per meal of 0.25 and 0.80 kWh gives 0.87 and 2.0 kWh
+        # a day: the range of median daily use in cooking diaries from four
+        # countries, 0.87-2.06 kWh (ESMAP 2020). The base case is 1.00.
+        ("Cooking energy", "0.87 kWh a day", (cfg, meal(0.25)),
+         "2.0 kWh a day", (cfg, meal(0.80))),
         ("Bills collected", "100%", (_set(cfg, "tariff", collection_rate=1.0), {}),
          "80%", (_set(cfg, "tariff", collection_rate=0.8), {})),
         ("Unserved demand allowed", "10%",

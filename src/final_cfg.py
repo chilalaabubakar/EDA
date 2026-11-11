@@ -53,11 +53,10 @@ BASE_CFG = {
            "collection_rate":0.90,
            # price paid by a commercial (anchor) customer, where one is modelled
            "anchor_rate_per_kwh":None},
- # DIESEL CUT (Phase 1). Every reported scenario ran with diesel_kw = 0, so
- # the generator, fuel prices and fuel escalation were removed from the model.
- # s3.4 ("diesel backup last") and the RURA/EPRA fuel-price sources go too.
- # Enforced on the WORST project year of the full simulation (s3.5), not on
- # the lifetime average. See sizing.py.
+ # The base case has no generator (solar and battery only). A backup diesel
+ # generator exists only as a sensitivity case: see "generator" below.
+ # The limit is enforced on the WORST project year of the full simulation, not
+ # on the lifetime average. See sizing.py.
  "reliability":{"max_unmet_demand_fraction":0.05},
  # REVIEW REVISION. Growth applies to appliance (non-cooking) demand only, and
  # at 2% a year: Kenyan billing data show use per rural customer levelling off
@@ -108,9 +107,6 @@ APPLIANCE_DURATIONS = "assumed"      # "assumed" (headline) | "measured"
 #       --rwanda-access-var <var> --durations assumed
 # Paste the emitted dicts over the two placeholders below.
 #
-# INTERIM: the Kenyan values are the v3 hand-typed set, retained only so the
-# pipeline runs before the extractor has been executed. They are close to but
-# not identical to the MTF rates and must be replaced.
 # MTF KEN_2016-2018, M3_Asset flags, rural WITH grid access (n=521),
 # weighted by pw_final, denominator = ALL households (absence from the
 # M3 owner roster counts as non-ownership, which is Rwanda's basis).
@@ -137,9 +133,9 @@ APPLIANCES_KENYA_PROVENANCE = "MTF M3_Asset, rural+grid, pw_final, all-household
 # m_m_3_group (questionnaire items M.15-M.40) instead of the M3 asset flags.
 # M3 "Yes" is close to a strict subset of the multi-select (mobile charger:
 # 271 of 712 multi-select owners flagged in M3), and the two disagree by
-# 3-10x. Which one measures ownership must be settled against Section M of
-# the questionnaire. The headline uses M3 (what v4 and s3.2 used) until then;
-# switch KENYA_OWNERSHIP_SOURCE to "core" to run the alternative.
+# 3-10x. The headline uses the core question, whose phone-charger ownership
+# (20% against 4%) is the more plausible; M3 is the robustness run
+# (KENYA_OWNERSHIP_SOURCE, kenya_ownership_check.py).
 APPLIANCES_KENYA_CORE = {
     "radio":              (0.3931, 15, 300, "06:00-22:00"),
     "tv_colour":          (0.348, 60, 240, "18:00-23:00"),
@@ -223,9 +219,9 @@ COUNTRY_OVERRIDES = {
  "rwanda": {"tariff":{"flat_rate_per_kwh":214/RWF_USD,
                       "bands":[(20, 89/RWF_USD),(50, 310/RWF_USD),(10**9, 369/RWF_USD)],
                       "telescopic":True,
-                      # anchor customer billed at the top residential block
-                      # (the non-residential schedule is close to it)
-                      "anchor_rate_per_kwh":369/RWF_USD},
+                      # anchor customer: non-residential rate above 100 kWh
+                      # a month, RWF 376 per kWh (same RURA schedule)
+                      "anchor_rate_per_kwh":376/RWF_USD},
             "appliances":APPLIANCES_RWANDA},
  # EPRA Schedule of Tariffs 2023, Kenya Gazette Notice No. 3899 (special issue,
  # 24 Mar 2023), Part II rates effective 1 July 2025: DC1 lifeline (<= 30 kWh)

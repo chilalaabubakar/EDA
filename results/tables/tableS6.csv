@@ -1,6 +1,9 @@
-Share of supper cooking moved (φ),"Rwanda battery saved, %","Rwanda LCOE fall, %","Rwanda break-even discount, US cents/kWh","Kenya battery saved, %","Kenya LCOE fall, %","Kenya break-even discount, US cents/kWh","Change in cooking peak, %"
-0.1,5 (5 to 6),1.5 (1.4 to 1.6),3.6 (3.3 to 4.0),4 (4 to 5),1.6 (1.6 to 1.7),3.7 (3.5 to 3.8),−9 (−10 to −8)
-0.2,10 (9 to 11),3.1 (3.0 to 3.3),7.0 (6.7 to 7.4),8 (7 to 9),3.2 (3.2 to 3.3),6.9 (6.8 to 7.1),−7 (−10 to −5)
-0.3,12 (10 to 13),4.1 (4.0 to 4.2),8.7 (8.4 to 9.1),13 (12 to 14),4.8 (4.7 to 4.8),9.6 (9.4 to 9.7),6 (4 to 7)
-0.4,16 (15 to 16),4.1 (4.0 to 4.2),8.0 (7.6 to 8.3),18 (17 to 18),5.6 (5.5 to 5.7),10.7 (10.5 to 10.8),18 (16 to 20)
-0.5,15 (13 to 16),4.0 (3.9 to 4.2),7.6 (7.3 to 8.0),23 (22 to 23),6.3 (6.2 to 6.4),11.4 (11.2 to 11.6),32 (29 to 35)
+Firewood displaced: basis,Share non-renewable,"Rwanda wood, t/household/yr","Rwanda CO2 avoided, t/household/yr","Rwanda extra subsidy, US$/t CO2","Kenya wood, t/household/yr","Kenya CO2 avoided, t/household/yr","Kenya extra subsidy, US$/t CO2"
+Equal useful cooking energy,10%,0.45,0.08,"1,512",0.45,0.08,"1,380"
+Equal useful cooking energy,30%,0.45,0.24,504,0.45,0.24,460
+Equal useful cooking energy,50%,0.45,0.39,302,0.45,0.39,276
+Equal useful cooking energy,80%,0.45,0.63,189,0.45,0.63,172
+"CDM default, 0.5 t per person per year",10%,2.00,0.35,340,2.00,0.35,310
+"CDM default, 0.5 t per person per year",30%,2.00,1.05,113,2.00,1.05,103
+"CDM default, 0.5 t per person per year",50%,2.00,1.75,68,2.00,1.75,62
+"CDM default, 0.5 t per person per year",80%,2.00,2.80,42,2.00,2.80,39

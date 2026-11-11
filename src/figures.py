@@ -169,7 +169,7 @@ SENS_LABEL = {"Capital cost": "Capital cost, −30% / +30%",
               "Discount rate": "Discount rate, 8% / 20%",
               "Battery cost": "Battery, US$150 / 450 per kWh",
               "Appliance demand growth": "Appliance growth, 0 / 5% a year",
-              "Energy per meal": "Energy per meal, 0.25 / 0.45 kWh",
+              "Cooking energy": "Cooking, 0.87 / 2.0 kWh a day",
               "Bills collected": "Bills collected, 100% / 80%",
               "Unserved demand allowed": "Unserved demand, 10% / 2%",
               "All cost inputs together": "Capital, operating, discount\nrate and collection together"}

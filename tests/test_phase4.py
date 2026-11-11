@@ -34,9 +34,12 @@ def test_no_twin_axes_in_figures():
 
 
 def test_every_figure_has_a_caption():
+    """Every figure file in results/figures is named in captions.md."""
     caps = (ROOT / "figures" / "captions.md").read_text()
-    for n in range(1, 7):
-        assert re.search(rf"\*\*Figure {n}\.", caps), f"Figure {n} caption missing"
+    stems = sorted(p.stem for p in (ROOT / "results" / "figures").glob("*.png"))
+    assert stems, "no figures in results/figures"
+    for stem in stems:
+        assert f"`{stem}`" in caps, f"{stem}: caption missing"
 
 
 def test_figures_render(tmp_path):
@@ -89,10 +92,12 @@ def test_resume_skips_finished_steps(tmp_path):
 
 
 def test_tables_are_rebuilt_after_every_analysis():
-    """table7 and the ensemble numbers need phase 2-3 outputs, so `all` must
-    build the tables once more after the last analysis step."""
+    """Tables 5 and 6, the supplementary tables and the ensemble numbers need
+    phase 2-3 outputs, so `all` must build the tables once more after the last
+    analysis step."""
     import pipeline
     order = list(pipeline.STEPS)
     assert "final_tables" in order
-    for needed in ("ensemble", "operating_subsidy", "household_cost"):
+    for needed in ("ensemble", "sensitivity", "operating_subsidy", "tariff_scenarios",
+                   "household_cost"):
         assert order.index(needed) < order.index("final_tables")

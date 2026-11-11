@@ -14,10 +14,11 @@ in claims.yaml):
     5 loss and subsidy by share cooking (needs burden.csv)
     6 tariff scenarios (needs tariff_scenarios.csv)
 Supplementary tables (`supplementary()`), written as tableS*.csv:
-    S2 bridge from the first submission   S3 input sensitivity
-    S4 structural alternatives            S5 subsidy with grants; break-even
-    tariff by discount rate               S6 daytime discount by share moved
-    S7 subsidy per tonne of CO2
+    S2 input sensitivity                  S3 structural alternatives
+    S4 subsidy with grants (a); break-even tariff by discount rate (b)
+    S5 daytime discount by share moved    S6 subsidy per tonne of CO2
+and tableR1.csv, the bridge from the first submission's base case, which
+belongs in the response to reviewers and not in the paper.
 """
 import argparse
 from pathlib import Path
@@ -200,8 +201,8 @@ def table6(T):
 
 # ------------------------------------------------------ supplementary tables
 def table_grants(O, D, grants=((0, "None"), (50, "50%"), (95, "95%"))):
-    """S5: operating subsidy with a capital grant, and the break-even tariff
-    by discount rate."""
+    """S4: operating subsidy with a capital grant (a), and the break-even
+    tariff by discount rate (b)."""
     O = O.set_index("site")
     a = []
     for g, label in grants:
@@ -261,7 +262,7 @@ def table_bridge(X):
 
 
 def table_phi(E):
-    """S6: daytime discount by share of supper cooking moved, mean of the seed
+    """S5: daytime discount by share of supper cooking moved, mean of the seed
     ensemble with the 95% interval of the mean (sampling noise only)."""
     def cell(site, q, phi, dp=0, scale=1.0, sign=1.0):
         r = E[(E.site == site) & (E.quantity == f"{q}_phi{int(round(100 * phi)):02d}")].iloc[0]
@@ -309,20 +310,20 @@ def supplementary(results="results"):
     R = Path(results)
     have = lambda f: (R / f).exists()
     out = {}
-    if have("bridge.csv"):
-        out["S2"] = table_bridge(pd.read_csv(R / "bridge.csv"))
     if have("sensitivity.csv"):
-        out["S3"] = table_sensitivity(pd.read_csv(R / "sensitivity.csv"))
+        out["S2"] = table_sensitivity(pd.read_csv(R / "sensitivity.csv"))
     if have("structural.csv"):
-        out["S4"] = table_structural(pd.read_csv(R / "structural.csv"))
+        out["S3"] = table_structural(pd.read_csv(R / "structural.csv"))
     if have("operating_subsidy.csv") and have("discount_sweep.csv"):
         a, b = table_grants(pd.read_csv(R / "operating_subsidy.csv"),
                             pd.read_csv(R / "discount_sweep.csv"))
-        out["S5a"], out["S5b"] = a, b
+        out["S4a"], out["S4b"] = a, b
     if have("ensemble_summary.csv"):
-        out["S6"] = table_phi(pd.read_csv(R / "ensemble_summary.csv"))
+        out["S5"] = table_phi(pd.read_csv(R / "ensemble_summary.csv"))
     if have("carbon.csv"):
-        out["S7"] = table_carbon(pd.read_csv(R / "carbon.csv"))
+        out["S6"] = table_carbon(pd.read_csv(R / "carbon.csv"))
+    if have("bridge.csv"):
+        out["R1"] = table_bridge(pd.read_csv(R / "bridge.csv"))
     return out
 
 
@@ -372,7 +373,7 @@ def headline_numbers(S, F, B, D, base_rate=0.12, discount=None):
 
 SENS_SLUG = {"Capital cost": "capital", "Operating cost": "opex", "Discount rate": "rate",
              "Battery cost": "battery", "Appliance demand growth": "growth",
-             "Energy per meal": "meal", "Bills collected": "collection",
+             "Cooking energy": "meal", "Bills collected": "collection",
              "Unserved demand allowed": "unserved", "All cost inputs together": "all"}
 TARIFF_SLUG = {"national tariff": "national",
                "national tariff, all charges (US$0.20/kWh)": "allin",
@@ -425,6 +426,10 @@ def phase_numbers(R):
                 out[f"burden_incremental_per_kwh_{tag}"] = r.incremental_usd_per_cooking_kwh
                 out[f"burden_cooking_cost_per_kwh_{tag}"] = r.incremental_cost_per_cooking_kwh
                 out[f"burden_cooking_kwh_{tag}"] = r.cooking_kwh_per_cooking_hh_year
+                coll = country_cfg(r.site)["tariff"]["collection_rate"]
+                # price at which cooking neither adds to nor lowers the subsidy
+                out[f"burden_cooking_breakeven_price_{tag}"] = (
+                    r.incremental_cost_per_cooking_kwh / coll)
         for site in SITES:
             g = b[b.site == site].sort_values("penetration")
             out[f"burden_loss_increase_pct_{site}"] = 100 * (g.iloc[-1].npv / g.iloc[0].npv - 1)
@@ -509,6 +514,8 @@ def phase_numbers(R):
                     out[f"opsub_grant{g}_{site}"] = r[f"opsub_grant{g}_usd_per_conn_year"]
                 out[f"opsub_village_k_{site}"] = r.opsub_grant0_usd_per_village_year1 / 1e3
                 out[f"opsub_npv_musd_{site}"] = r.opsub_grant0_npv_usd / 1e6
+                if "capital_recovery_factor" in r:
+                    out["capital_recovery_pct"] = 100 * r.capital_recovery_factor
                 out[f"opsub_grant95_cut_pct_{site}"] = 100 * (
                     1 - r.opsub_grant95_usd_per_conn_year / r.opsub_grant0_usd_per_conn_year)
                 out[f"gross_capex_musd_{site}"] = r.gross_capex / 1e6
@@ -523,6 +530,12 @@ def phase_numbers(R):
             out[f"site_{r.quantity}_national_{r.site}"] = r.national
             out[f"site_{r.quantity}_island_{r.site}"] = r.island
             out[f"site_{r.quantity}_change_pct_{r.site}"] = r.change_pct
+    if have("adoption_penalty_households.csv"):
+        a = pd.read_csv(R / "adoption_penalty_households.csv")
+        for _, r in a.iterrows():
+            tag = f"year{int(r.year)}_{r.site}"
+            out[f"hhpen_p10_{tag}"], out[f"hhpen_p90_{tag}"] = r.factor_p10, r.factor_p90
+            out[f"hhpen_median_{tag}"] = r.factor_median
     if have("expansion.csv"):
         x = pd.read_csv(R / "expansion.csv")
         for site in SITES:
@@ -574,6 +587,11 @@ def phase_numbers(R):
                 if "capital_pv" in r:
                     out[f"cvp_capital_pv_musd_{p}_{site}"] = r.capital_pv / 1e6
                     out[f"cvp_curtailed_pct_{p}_{site}"] = 100 * r.curtailed_fraction
+                    out[f"cvp_capex_per_connection_{p}_{site}"] = r.gross_capex / 300.0
+                for q in ("opex_per_connection_year1", "opex_per_connection_final",
+                          "revenue_per_connection_year1"):
+                    if q in r:
+                        out[f"cvp_{q}_{p}_{site}"] = r[q]
             lo, hi = g.iloc[0], g.iloc[-1]          # no cooking, full cooking
             out[f"cvp_energy_ratio_{site}"] = (hi.kwh_per_connection_year1
                                                / lo.kwh_per_connection_year1)
@@ -587,6 +605,11 @@ def phase_numbers(R):
                 100 * (lo.per_connection_fixed - hi.per_connection_fixed) / (lo.lcoe - hi.lcoe))
             out[f"cvp_cost_factor_{site}"] = lo.lcoe / hi.lcoe
             out[f"cvp_price_factor_{site}"] = hi.avg_price_paid / lo.avg_price_paid
+        for q in ("opex_per_connection_year1", "opex_per_connection_final",
+                  "capex_per_connection"):
+            vals = [v for k, v in out.items() if k.startswith(f"cvp_{q}_")]
+            if vals:
+                out[f"cvp_{q}_min"], out[f"cvp_{q}_max"] = min(vals), max(vals)
     if have("bill_example.csv"):
         for _, r in pd.read_csv(R / "bill_example.csv").iterrows():
             for q, v in r.items():
@@ -617,7 +640,16 @@ def build_all(results="results", validation=None):
         tables[5] = table5(pd.read_csv(R / "burden.csv"))
     if have("tariff_scenarios.csv"):
         tables[6] = table6(pd.read_csv(R / "tariff_scenarios.csv"))
-    return tables, {**headline_numbers(S, F, B, D), **phase_numbers(R)}
+    numbers = {**headline_numbers(S, F, B, D), **phase_numbers(R)}
+    for site in SITES:
+        # what a cooking household pays per kWh of cooking at the national
+        # tariff: the rise in its monthly bill over the rise in its use
+        if f"ts_cooking_bill_national_{site}" in numbers:
+            numbers[f"cooking_price_paid_{site}"] = (
+                numbers[f"ts_cooking_bill_national_{site}"]
+                / (numbers[f"kwh_month_post_year1_{site}"]
+                   - numbers[f"kwh_month_pre_year1_{site}"]))
+    return tables, numbers
 
 
 def to_markdown(df):

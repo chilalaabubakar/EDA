@@ -602,7 +602,8 @@ def simulate(cfg, sizing, load_builder, resource, tariff_mode="flat",
     metrics["peak_load_kw"] = peak_load
     metrics["max_balance_residual_kw"] = float(df.balance_residual_kw.max())
     metrics["capex_items"] = capex_items
-    metrics["generator_share"] = float(df.generator_kwh.sum() / df.served_kwh.sum())
+    served = float(df.served_kwh.sum())
+    metrics["generator_share"] = float(df.generator_kwh.sum()) / served if served else 0.0
     return df, metrics
 
 

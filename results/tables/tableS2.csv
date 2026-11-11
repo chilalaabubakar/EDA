@@ -1,7 +1,20 @@
-Step (cumulative),"Rwanda LCOE, no cooking","Rwanda LCOE, full cooking","Rwanda NPV, US$ million","Rwanda subsidy, US$/connection/yr",Rwanda extra per cooking household,"Kenya LCOE, no cooking","Kenya LCOE, full cooking","Kenya NPV, US$ million","Kenya subsidy, US$/connection/yr",Kenya extra per cooking household
-0 first submission,$2.68,$1.08,−1.29,671,368,$1.72,$0.99,−1.39,722,354
-1 operating cost constant in real terms,$2.38,$1.03,−1.22,644,368,$1.57,$0.95,−1.32,695,354
-2 operating cost split into customer and plant parts,$2.32,$1.11,−1.32,690,420,$1.58,$1.02,−1.43,746,403
-3 cooking energy does not grow; appliance demand grows 2% a year,$2.29,$0.83,−0.71,368,153,$1.47,$0.77,−0.76,395,138
-4 two-stage build,$2.21,$0.81,−0.68,348,143,$1.39,$0.74,−0.72,370,131
-5 target return equal to the discount rate (this paper),$2.21,$0.81,−0.68,302,119,$1.39,$0.74,−0.72,321,108
+Input changed,"Rwanda LCOE, no cooking","Rwanda LCOE, full cooking","Rwanda NPV, US$ million","Rwanda subsidy, US$/connection/yr",Rwanda extra per cooking household,"Kenya LCOE, no cooking","Kenya LCOE, full cooking","Kenya NPV, US$ million","Kenya subsidy, US$/connection/yr",Kenya extra per cooking household
+Base case,$2.21,$0.81,−0.68,302,119,$1.39,$0.74,−0.72,321,108
+Capital cost: 30% lower,$1.75,$0.61,−0.48,214,69,$1.08,$0.55,−0.50,225,62
+Capital cost: 30% higher,$2.66,$1.01,−0.87,390,168,$1.69,$0.92,−0.93,417,155
+Operating cost: 50% lower,$1.81,$0.71,−0.58,259,109,$1.17,$0.65,−0.62,276,99
+Operating cost: 50% higher,$2.60,$0.91,−0.77,346,129,$1.61,$0.82,−0.82,366,118
+Discount rate: 8%,$1.86,$0.67,−0.72,245,89,$1.16,$0.61,−0.76,259,80
+Discount rate: 20%,$2.99,$1.10,−0.63,429,186,$1.89,$1.01,−0.67,458,171
+Battery cost: US$150/kWh,$2.06,$0.71,−0.58,259,90,$1.25,$0.64,−0.60,270,79
+Battery cost: US$450/kWh,$2.36,$0.90,−0.77,345,149,$1.51,$0.84,−0.83,372,138
+Appliance demand growth: none,$2.37,$0.81,−0.66,295,123,$1.46,$0.73,−0.68,305,109
+Appliance demand growth: 5% a year,$2.00,$0.82,−0.72,320,117,$1.30,$0.75,−0.79,354,110
+Cooking energy: 0.87 kWh a day,$2.21,$0.84,−0.65,290,106,$1.39,$0.76,−0.69,306,94
+Cooking energy: 2.0 kWh a day,$2.21,$0.66,−0.88,395,211,$1.39,$0.62,−0.98,436,223
+Bills collected: 100%,$2.21,$0.81,−0.66,297,114,$1.39,$0.74,−0.70,314,103
+Bills collected: 80%,$2.21,$0.81,−0.69,308,124,$1.39,$0.74,−0.73,327,113
+Unserved demand allowed: 10%,$2.18,$0.79,−0.64,286,107,$1.36,$0.71,−0.67,297,94
+Unserved demand allowed: 2%,$2.26,$0.85,−0.73,327,137,$1.44,$0.79,−0.79,353,130
+All cost inputs together: all favourable,$1.13,$0.42,−0.38,129,36,$0.72,$0.39,−0.40,134,31
+All cost inputs together: all adverse,$4.08,$1.50,−0.89,608,273,$2.58,$1.37,−0.95,651,253

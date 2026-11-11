@@ -1,8 +1,0 @@
-Design,"Rwanda LCOE, no cooking","Rwanda LCOE, full cooking","Rwanda NPV, US$ million","Rwanda subsidy, US$/connection/yr",Rwanda extra per cooking household,"Kenya LCOE, no cooking","Kenya LCOE, full cooking","Kenya NPV, US$ million","Kenya subsidy, US$/connection/yr",Kenya extra per cooking household
-Base case (two-stage solar and battery),$2.21,$0.81,−0.68,302,119,$1.39,$0.74,−0.72,321,108
-"Single-stage build, sized for the worst of 20 years",$2.29,$0.83,−0.71,318,127,$1.47,$0.77,−0.76,341,114
-"Commercial anchor load, 120 kWh a day",$1.11,$0.69,−0.69,308,113,$0.91,$0.64,−0.75,335,108
-"Backup generator, diesel at US$1.00 a litre",$1.98,$0.69,−0.58,258,92,$1.22,$0.63,−0.61,273,86
-"Backup generator, diesel at US$1.50 a litre",$2.11,$0.78,−0.67,300,123,$1.33,$0.72,−0.72,319,114
-"Backup generator, diesel at US$2.00 a litre",$2.15,$0.81,−0.70,312,131,$1.36,$0.74,−0.74,331,121
-Anchor load and backup generator (diesel US$1.50),$1.05,$0.67,−0.68,304,115,$0.87,$0.62,−0.74,330,109

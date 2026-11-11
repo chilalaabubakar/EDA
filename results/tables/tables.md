@@ -56,17 +56,6 @@
 
 ### Table S2
 
-| Step (cumulative) | Rwanda LCOE, no cooking | Rwanda LCOE, full cooking | Rwanda NPV, US$ million | Rwanda subsidy, US$/connection/yr | Rwanda extra per cooking household | Kenya LCOE, no cooking | Kenya LCOE, full cooking | Kenya NPV, US$ million | Kenya subsidy, US$/connection/yr | Kenya extra per cooking household |
-|---|---|---|---|---|---|---|---|---|---|---|
-| 0 first submission | $2.68 | $1.08 | −1.29 | 671 | 368 | $1.72 | $0.99 | −1.39 | 722 | 354 |
-| 1 operating cost constant in real terms | $2.38 | $1.03 | −1.22 | 644 | 368 | $1.57 | $0.95 | −1.32 | 695 | 354 |
-| 2 operating cost split into customer and plant parts | $2.32 | $1.11 | −1.32 | 690 | 420 | $1.58 | $1.02 | −1.43 | 746 | 403 |
-| 3 cooking energy does not grow; appliance demand grows 2% a year | $2.29 | $0.83 | −0.71 | 368 | 153 | $1.47 | $0.77 | −0.76 | 395 | 138 |
-| 4 two-stage build | $2.21 | $0.81 | −0.68 | 348 | 143 | $1.39 | $0.74 | −0.72 | 370 | 131 |
-| 5 target return equal to the discount rate (this paper) | $2.21 | $0.81 | −0.68 | 302 | 119 | $1.39 | $0.74 | −0.72 | 321 | 108 |
-
-### Table S3
-
 | Input changed | Rwanda LCOE, no cooking | Rwanda LCOE, full cooking | Rwanda NPV, US$ million | Rwanda subsidy, US$/connection/yr | Rwanda extra per cooking household | Kenya LCOE, no cooking | Kenya LCOE, full cooking | Kenya NPV, US$ million | Kenya subsidy, US$/connection/yr | Kenya extra per cooking household |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Base case | $2.21 | $0.81 | −0.68 | 302 | 119 | $1.39 | $0.74 | −0.72 | 321 | 108 |
@@ -80,8 +69,8 @@
 | Battery cost: US$450/kWh | $2.36 | $0.90 | −0.77 | 345 | 149 | $1.51 | $0.84 | −0.83 | 372 | 138 |
 | Appliance demand growth: none | $2.37 | $0.81 | −0.66 | 295 | 123 | $1.46 | $0.73 | −0.68 | 305 | 109 |
 | Appliance demand growth: 5% a year | $2.00 | $0.82 | −0.72 | 320 | 117 | $1.30 | $0.75 | −0.79 | 354 | 110 |
-| Energy per meal: 0.25 kWh | $2.21 | $0.84 | −0.65 | 290 | 106 | $1.39 | $0.76 | −0.69 | 306 | 94 |
-| Energy per meal: 0.45 kWh | $2.21 | $0.76 | −0.72 | 323 | 139 | $1.39 | $0.70 | −0.77 | 343 | 130 |
+| Cooking energy: 0.87 kWh a day | $2.21 | $0.84 | −0.65 | 290 | 106 | $1.39 | $0.76 | −0.69 | 306 | 94 |
+| Cooking energy: 2.0 kWh a day | $2.21 | $0.66 | −0.88 | 395 | 211 | $1.39 | $0.62 | −0.98 | 436 | 223 |
 | Bills collected: 100% | $2.21 | $0.81 | −0.66 | 297 | 114 | $1.39 | $0.74 | −0.70 | 314 | 103 |
 | Bills collected: 80% | $2.21 | $0.81 | −0.69 | 308 | 124 | $1.39 | $0.74 | −0.73 | 327 | 113 |
 | Unserved demand allowed: 10% | $2.18 | $0.79 | −0.64 | 286 | 107 | $1.36 | $0.71 | −0.67 | 297 | 94 |
@@ -89,19 +78,19 @@
 | All cost inputs together: all favourable | $1.13 | $0.42 | −0.38 | 129 | 36 | $0.72 | $0.39 | −0.40 | 134 | 31 |
 | All cost inputs together: all adverse | $4.08 | $1.50 | −0.89 | 608 | 273 | $2.58 | $1.37 | −0.95 | 651 | 253 |
 
-### Table S4
+### Table S3
 
 | Design | Rwanda LCOE, no cooking | Rwanda LCOE, full cooking | Rwanda NPV, US$ million | Rwanda subsidy, US$/connection/yr | Rwanda extra per cooking household | Kenya LCOE, no cooking | Kenya LCOE, full cooking | Kenya NPV, US$ million | Kenya subsidy, US$/connection/yr | Kenya extra per cooking household |
 |---|---|---|---|---|---|---|---|---|---|---|
 | Base case (two-stage solar and battery) | $2.21 | $0.81 | −0.68 | 302 | 119 | $1.39 | $0.74 | −0.72 | 321 | 108 |
 | Single-stage build, sized for the worst of 20 years | $2.29 | $0.83 | −0.71 | 318 | 127 | $1.47 | $0.77 | −0.76 | 341 | 114 |
-| Commercial anchor load, 120 kWh a day | $1.11 | $0.69 | −0.69 | 308 | 113 | $0.91 | $0.64 | −0.75 | 335 | 108 |
+| Commercial anchor load, 120 kWh a day | $1.11 | $0.69 | −0.69 | 307 | 113 | $0.91 | $0.64 | −0.75 | 335 | 108 |
 | Backup generator, diesel at US$1.00 a litre | $1.98 | $0.69 | −0.58 | 258 | 92 | $1.22 | $0.63 | −0.61 | 273 | 86 |
 | Backup generator, diesel at US$1.50 a litre | $2.11 | $0.78 | −0.67 | 300 | 123 | $1.33 | $0.72 | −0.72 | 319 | 114 |
 | Backup generator, diesel at US$2.00 a litre | $2.15 | $0.81 | −0.70 | 312 | 131 | $1.36 | $0.74 | −0.74 | 331 | 121 |
-| Anchor load and backup generator (diesel US$1.50) | $1.05 | $0.67 | −0.68 | 304 | 115 | $0.87 | $0.62 | −0.74 | 330 | 109 |
+| Anchor load and backup generator (diesel US$1.50) | $1.05 | $0.67 | −0.68 | 303 | 115 | $0.87 | $0.62 | −0.74 | 330 | 109 |
 
-### Table S5a
+### Table S4a
 
 | Capital grant | Rwanda, US$/connection/yr | Rwanda, US$/village/yr | Kenya, US$/connection/yr | Kenya, US$/village/yr |
 |---|---|---|---|---|
@@ -109,7 +98,7 @@
 | 50% | 179 | 54,000 | 188 | 56,000 |
 | 95% | 68 | 21,000 | 68 | 20,000 |
 
-### Table S5b
+### Table S4b
 
 | Discount rate | Rwanda LCOE | Rwanda break-even tariff | Rwanda multiple | Kenya LCOE | Kenya break-even tariff | Kenya multiple |
 |---|---|---|---|---|---|---|
@@ -118,7 +107,7 @@
 | 15% | $0.91 | $1.01 | 7.9× | $0.84 | $0.93 | 7.3× |
 | 20% | $1.10 | $1.22 | 9.5× | $1.01 | $1.12 | 8.8× |
 
-### Table S6
+### Table S5
 
 | Share of supper cooking moved (φ) | Rwanda battery saved, % | Rwanda LCOE fall, % | Rwanda break-even discount, US cents/kWh | Kenya battery saved, % | Kenya LCOE fall, % | Kenya break-even discount, US cents/kWh | Change in cooking peak, % |
 |---|---|---|---|---|---|---|---|
@@ -128,7 +117,7 @@
 | 0.4 | 16 (15 to 16) | 4.1 (4.0 to 4.2) | 8.0 (7.6 to 8.3) | 18 (17 to 18) | 5.6 (5.5 to 5.7) | 10.7 (10.5 to 10.8) | 18 (16 to 20) |
 | 0.5 | 15 (13 to 16) | 4.0 (3.9 to 4.2) | 7.6 (7.3 to 8.0) | 23 (22 to 23) | 6.3 (6.2 to 6.4) | 11.4 (11.2 to 11.6) | 32 (29 to 35) |
 
-### Table S7
+### Table S6
 
 | Firewood displaced: basis | Share non-renewable | Rwanda wood, t/household/yr | Rwanda CO2 avoided, t/household/yr | Rwanda extra subsidy, US$/t CO2 | Kenya wood, t/household/yr | Kenya CO2 avoided, t/household/yr | Kenya extra subsidy, US$/t CO2 |
 |---|---|---|---|---|---|---|---|
@@ -140,3 +129,14 @@
 | CDM default, 0.5 t per person per year | 30% | 2.00 | 1.05 | 113 | 2.00 | 1.05 | 103 |
 | CDM default, 0.5 t per person per year | 50% | 2.00 | 1.75 | 68 | 2.00 | 1.75 | 62 |
 | CDM default, 0.5 t per person per year | 80% | 2.00 | 2.80 | 42 | 2.00 | 2.80 | 39 |
+
+### Table R1
+
+| Step (cumulative) | Rwanda LCOE, no cooking | Rwanda LCOE, full cooking | Rwanda NPV, US$ million | Rwanda subsidy, US$/connection/yr | Rwanda extra per cooking household | Kenya LCOE, no cooking | Kenya LCOE, full cooking | Kenya NPV, US$ million | Kenya subsidy, US$/connection/yr | Kenya extra per cooking household |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 0 first submission | $2.68 | $1.08 | −1.29 | 671 | 368 | $1.72 | $0.99 | −1.39 | 722 | 354 |
+| 1 operating cost constant in real terms | $2.38 | $1.03 | −1.22 | 644 | 368 | $1.57 | $0.95 | −1.32 | 695 | 354 |
+| 2 operating cost split into customer and plant parts | $2.32 | $1.11 | −1.32 | 690 | 420 | $1.58 | $1.02 | −1.43 | 746 | 403 |
+| 3 cooking energy does not grow; appliance demand grows 2% a year | $2.29 | $0.83 | −0.71 | 368 | 153 | $1.47 | $0.77 | −0.76 | 395 | 138 |
+| 4 two-stage build | $2.21 | $0.81 | −0.68 | 348 | 143 | $1.39 | $0.74 | −0.72 | 370 | 131 |
+| 5 target return equal to the discount rate (this paper) | $2.21 | $0.81 | −0.68 | 302 | 119 | $1.39 | $0.74 | −0.72 | 321 | 108 |

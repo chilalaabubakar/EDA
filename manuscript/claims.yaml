@@ -3,10 +3,13 @@
 #
 # pattern : regex matched against the manuscript text; one capture group per
 #           entry in `values`
-# values  : [key, format] pairs; key from manuscript_tables.headline_numbers()
+# values  : [key, format] pairs; key from manuscript_tables.build_all(). A key
+#           may start with "-" to quote the magnitude of a negative result.
 #
-# tables  : optional; generated table numbers in manuscript order (default
-#           1..6). A draft that drops or adds tables lists them here.
+# tables  : generated table numbers in manuscript order. The paper's Table 4
+#           is generated table 5 (the burden by adoption) and its Table 5 is
+#           generated table 6 (tariff scenarios); generated table 4 (price
+#           paid by year) is supplementary.
 #
 # A draft whose text differs can carry its own manuscript/private/claims.yaml
 # (gitignored), which manuscript_check.py uses in preference to this file.
@@ -14,27 +17,38 @@
 # When the text is rewritten, update the pattern here in the same commit.
 # A pattern that no longer matches FAILS the test rather than skipping,
 # so a claim cannot silently drop out of checking.
+tables: [1, 2, 3, 5, 6]
+
 claims:
   - id: abstract_lcoe_reduction
-    pattern: 'Levelised cost falls by (\d+)% in Rwanda and (\d+)% in Kenya'
+    pattern: 'lowers the levelised cost of electricity by (\d+)% in Rwanda and (\d+)% in Kenya'
     values: [[lcoe_reduction_pct_rwanda, "{:.0f}"], [lcoe_reduction_pct_kenya, "{:.0f}"]]
-  - id: abstract_avoided_storage
-    pattern: 'displaces (\d+)% of battery capacity in Rwanda and (\d+)% in Kenya'
-    values: [[avoided_storage_pct_rwanda, "{:.0f}"], [avoided_storage_pct_kenya, "{:.0f}"]]
-  - id: abstract_tou_lcoe
-    pattern: 'lowering levelised cost by a further (\d+) to (\d+) per cent'
-    values: [[tou_lcoe_reduction_pct_min, "{:.0f}"], [tou_lcoe_reduction_pct_max, "{:.0f}"]]
-  - id: abstract_multiple
-    pattern: 'viability is ([\d.]+) times the regulated rate in Rwanda and ([\d.]+) times in Kenya'
-    values: [[multiple_base_rwanda, "{:.1f}"], [multiple_base_kenya, "{:.1f}"]]
-  - id: abstract_multiple_20pct
-    pattern: 'rising to between (\d+) and (\d+) times at a 20% cost of capital'
-    values: [[multiple_max_rate_min, "{:.0f}"], [multiple_max_rate_max, "{:.0f}"]]
-  - id: abstract_band_penalty
-    pattern: 'blended rate rise ([\d.]+)-fold, from \$([\d.]+) to \$([\d.]+) per kilowatt-hour, against ([\d.]+)-fold in Kenya'
-    values: [[band_factor_year1_rwanda, "{:.1f}"], [blended_pre_year1_rwanda, "{:.3f}"],
-             [blended_post_year1_rwanda, "{:.3f}"], [band_factor_year1_kenya, "{:.1f}"]]
-  - id: s51_lcoe_levels
-    pattern: 'falls from \$([\d.]+) to \$([\d.]+) per kWh in Rwanda, a reduction of (\d+)%, and from \$([\d.]+) to \$([\d.]+) in Kenya, a reduction of (\d+)%'
+  - id: abstract_energy_ratio
+    pattern: 'divided by ([\d.]+) to ([\d.]+) times as much energy'
+    values: [[cvp_energy_ratio_kenya, "{:.1f}"], [cvp_energy_ratio_rwanda, "{:.1f}"]]
+  - id: abstract_loss
+    pattern: 'enlarges the operator''s loss, by (\d+)% and (\d+)%'
+    values: [[burden_loss_increase_pct_rwanda, "{:.0f}"], [burden_loss_increase_pct_kenya, "{:.0f}"]]
+  - id: abstract_cooking_cost
+    pattern: 'cooking energy costs about US\$([\d.]+) to ([\d.]+)/kWh to supply and sells for about US\$(\d+\.\d+)'
+    values: [[burden_cooking_cost_per_kwh_100_kenya, "{:.2f}"], [burden_cooking_cost_per_kwh_100_rwanda, "{:.2f}"],
+             [cooking_price_paid_rwanda, "{:.2f}"]]
+  - id: abstract_subsidy
+    pattern: 'rises from US\$(\d+) to (\d+) per connection per year in Rwanda and from US\$(\d+) to (\d+) in Kenya: US\$(\d+) and (\d+) for each cooking household, or US\$(\d+) to ([\d,]+) per tonne'
+    values: [[burden_opsub_0_rwanda, "{:.0f}"], [burden_opsub_100_rwanda, "{:.0f}"],
+             [burden_opsub_0_kenya, "{:.0f}"], [burden_opsub_100_kenya, "{:.0f}"],
+             [burden_incremental_100_rwanda, "{:.0f}"], [burden_incremental_100_kenya, "{:.0f}"],
+             [carbon_usd_min_all, "{:.0f}"], [carbon_usd_max_all, "{:,.0f}"]]
+  - id: abstract_range
+    pattern: 'This increment ranges from US\$(\d+) to (\d+) across input assumptions'
+    values: [[sens_incremental_all_low_kenya, "{:.0f}"], [sens_incremental_all_high_rwanda, "{:.0f}"]]
+  - id: abstract_band
+    pattern: 'raises a cooking household''s average price ([\d.]+)-fold'
+    values: [[band_factor_year1_rwanda, "{:.1f}"]]
+  - id: abstract_daytime
+    pattern: 'would cut battery capacity by (\d+) to (\d+)%'
+    values: [[ens_avoided_battery_pct_phi50_rwanda, "{:.0f}"], [ens_avoided_battery_pct_phi50_kenya, "{:.0f}"]]
+  - id: s41_lcoe_levels
+    pattern: 'lowers the LCOE from US\$([\d.]+) to US\$([\d.]+)/kWh in Rwanda \((\d+)% lower\) and from US\$([\d.]+) to US\$([\d.]+)/kWh in Kenya \((\d+)% lower\)'
     values: [[lcoe_zero_rwanda, "{:.2f}"], [lcoe_full_rwanda, "{:.2f}"], [lcoe_reduction_pct_rwanda, "{:.0f}"],
              [lcoe_zero_kenya, "{:.2f}"], [lcoe_full_kenya, "{:.2f}"], [lcoe_reduction_pct_kenya, "{:.0f}"]]

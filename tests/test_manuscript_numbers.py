@@ -68,7 +68,8 @@ def _write_docx(path, tables, text):
 
 
 def _text(n):
-    return (f"Levelised cost falls by {n['lcoe_reduction_pct_rwanda']:.0f}% in Rwanda "
+    return ("Full adoption lowers the levelised cost of electricity by "
+            f"{n['lcoe_reduction_pct_rwanda']:.0f}% in Rwanda "
             f"and {n['lcoe_reduction_pct_kenya']:.0f}% in Kenya.")
 
 

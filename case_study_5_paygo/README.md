@@ -6,6 +6,9 @@
 payment-allocation assumption and the same checks, and it reproduces every worked number from the TA notebook and
 the lecture. It then extends the analysis to the whole portfolio.
 
+`Case_5_-_Decision_Briefing.pptx` is the 10-slide decision briefing for the investment committee, in the same
+style as the Case 4 deck. Its charts are native PowerPoint charts, and every slide has speaker notes.
+
 ## Running it
 
 1. Put the two course CSVs in `data/` next to the notebook, with these names:

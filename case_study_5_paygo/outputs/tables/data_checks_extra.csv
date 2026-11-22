@@ -1,0 +1,8 @@
+Check,Contracts,Treatment
+Contracts with no payment rows at all,8,Kept; zero cash. They count against repayment.
+Zero-deposit contracts,358,Kept. All are models Z28 (242) and Z34 (116); they perform poorly (Section 9).
+Cash in the sale month below the deposit,1056,Kept. Subtracting the full deposit (TA rule) makes these slightly conservative.
+Ledger total above the full contract price,1974,Overpayment. The cap at amount due removes it from every KPI.
+Not PAID_OFF but ledger >= contract price,9,All among the 341 conflicts; the ledger looks overstated here.
+PAID_OFF with snapshot total below price,0,"None, so the payoff date is consistent with receipts."
+Original schedule rebuilt exactly (see 2.1),25685,due_to_date and due_at_90d reproduced for every contract.

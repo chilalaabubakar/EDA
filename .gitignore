@@ -17,3 +17,7 @@ data/processed/resource_rwanda.csv
 data/processed/resource_kenya.csv
 # Pipeline resume markers (per results directory)
 results/.steps_done
+
+# Case Study 5: course data files stay local (public repo)
+case_study_5_paygo/data/
+.ipynb_checkpoints/

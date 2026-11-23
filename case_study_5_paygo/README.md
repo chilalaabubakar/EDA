@@ -35,7 +35,7 @@ style as the Case 4 deck. Its charts are native PowerPoint charts, and every sli
 | 10 | Energy access: lockouts, repossessions, ownership |
 | 11 | Risk in the open book: outstanding balance, portfolio at risk, inactive customers |
 | 12 | Projection of lifetime repayment, with a backtest; the time value of late payment |
-| 13 | Recommendation and conditions |
+| 13 | Decision and conditions |
 | 14 | Final checks |
 
 ## Main results
@@ -51,9 +51,8 @@ style as the Case 4 deck. Its charts are native PowerPoint charts, and every sli
 | Active customers locked out on 10 Aug 2026 | 8,140 of 15,885 (51%) |
 | Projected lifetime PvP, 2025 cohorts | about 78–80% |
 
-**Recommendation:** do not commit the full investment now. Offer a smaller first tranche limited to proven products
-sold with a deposit, and release the rest only if new cohorts' repayment stops falling. The triggers and information
-requests are in Section 13.
+**Decision:** invest a smaller first amount now, only in products sold with a deposit. Add more only if new cohorts
+stop getting worse. Conditions are in Section 13.
 
 All repayment figures are conditional estimates. They assume receipts after the deposit are applied to instalments
 due, because the files have monthly cash only, not GOGLA's daily allocation ledger.

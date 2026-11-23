@@ -7,7 +7,7 @@ payment-allocation assumption and the same checks, and it reproduces every worke
 the lecture. It then extends the analysis to the whole portfolio.
 
 `Case_5_-_Decision_Briefing.pptx` is the 12-slide decision briefing for the investment committee, in the same
-style as the Case 4 deck. Its charts are native PowerPoint charts, and every slide has speaker notes.
+style as the Case 4 deck. It follows the course structure: recommendation, portfolio overview, risk today, repayment, losses, data quality, conditions and next steps. Its charts are native PowerPoint charts, and every slide has speaker notes.
 
 ## Running it
 
@@ -33,8 +33,8 @@ style as the Case 4 deck. Its charts are native PowerPoint charts, and every sli
 | 8 | Does day 90 predict later results? (contract level and cohort level) |
 | 9 | Drivers: calendar-time drop, channel, region, deposit, the new large products |
 | 10 | Energy access: lockouts, repossessions, ownership |
-| 11 | Risk in the open book: outstanding balance, portfolio at risk, inactive customers |
-| 12 | Projection of lifetime repayment, with a backtest; the time value of late payment |
+| 11 | Risk in the open book: outstanding balance, PAR and arrears buckets, lock rate; losses so far (repossessions, write-off proxy) |
+| 12 | Forecast of lifetime repayment with a backtest, a stress scenario, and the time value of late payment |
 | 13 | Decision and conditions |
 | 14 | Final checks |
 

@@ -9,6 +9,8 @@ the lecture. It then extends the analysis to the whole portfolio.
 `Case_5_-_Decision_Briefing.pptx` is the 12-slide decision briefing for the investment committee, in the same
 style as the Case 4 deck. It follows the course structure: recommendation, portfolio overview, risk today, repayment, losses, data quality, conditions and next steps. Its charts are native PowerPoint charts, and every slide has speaker notes.
 
+`report/Case_Study_5_Report_PAYGo_Investment.docx` is the 4-page technical report for the investment committee, organised around the brief's four questions and the assessment rubric.
+
 ## Running it
 
 1. Put the two course CSVs in `data/` next to the notebook, with these names:
@@ -32,7 +34,7 @@ style as the Case 4 deck. It follows the course structure: recommendation, portf
 | 7 | KPIs 4–5: PvP and ownership at 2× term, plus 1× and 1.5×, against GOGLA benchmarks |
 | 8 | Does day 90 predict later results? (contract level and cohort level) |
 | 9 | Drivers: calendar-time drop, channel, region, deposit, the new large products |
-| 10 | Energy access: lockouts, repossessions, ownership |
+| 10 | Lockouts, repossessions, ownership; check that lock records match payments |
 | 11 | Risk in the open book: outstanding balance, PAR and arrears buckets, lock rate; losses so far (repossessions, write-off proxy) |
 | 12 | Forecast of lifetime repayment with a backtest, a stress scenario, and the time value of late payment |
 | 13 | Decision and conditions |

@@ -2,9 +2,8 @@
 
 04-782 Energy Data Analytics. Should an investor put money into a Nigerian PAYGo solar company?
 
-`PAYGo_Investment_Analysis.ipynb` builds on the TA's starter notebook. It uses the same cleaning, the same
-payment-allocation assumption and the same checks, and it reproduces every worked number from the TA notebook and
-the lecture. It then extends the analysis to the whole portfolio.
+`PAYGo_Investment_Analysis.ipynb` checks and cleans the data, reproduces the worked examples from the lecture, and
+analyses the whole portfolio.
 
 `Case_5_-_Decision_Briefing.pptx` is the 12-slide decision briefing for the investment committee, in the same
 style as the Case 4 deck. It follows the course structure: recommendation, portfolio overview, risk today, repayment, losses, data quality, conditions and next steps. Its charts are native PowerPoint charts, and every slide has speaker notes.
@@ -25,8 +24,8 @@ style as the Case 4 deck. It follows the course structure: recommendation, portf
 
 | Section | Content |
 |---|---|
-| 1 | The TA's data checks reproduced, extra checks, and the cleaning decisions |
-| 2 | Original schedule rebuilt exactly from contract terms; measurement functions; TA results reproduced |
+| 1 | Data checks and the cleaning decisions |
+| 2 | Original schedule rebuilt exactly from contract terms; measurement functions; lecture examples reproduced |
 | 3 | Sales volume, product mix, deposits, channels, status |
 | 4 | KPIs 1–2: portfolio PvP and PvFin, by cohort and over time |
 | 5 | Vintage curves: PvP at the same share of the term, all products and Z17 only |

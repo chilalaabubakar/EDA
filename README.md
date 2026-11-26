@@ -88,6 +88,15 @@ sets up Python 3.11 with uv (Colab's own Python is 3.13), keeps results and
 weather data on Google Drive, and resumes where it stopped if the runtime
 resets. On a standard Colab machine the full run takes about 25 minutes.
 
+### Research notebook
+
+`notebooks/eCooking_MiniGrids_Research.ipynb` walks through the study section
+by section: survey data, weather, the demand model and its calibration,
+sizing, cost and subsidy, household bills, weather years and uncertainty. It
+runs the model live (about 30 seconds once the hourly weather is downloaded)
+and checks the results against `results/`. It uses only the aggregates in
+`data/processed/`.
+
 ## Pipeline steps
 
 `python src/pipeline.py <step | phase1 | phase2 | phase3 | phase4 | all>`
@@ -192,7 +201,7 @@ params.yaml     run settings, sites, weather years
 data/processed/ aggregate survey statistics and the weather summary
 data/raw/       survey microdata and raw downloads (not committed)
 results/        every result, table and figure
-notebooks/      v5 Colab notebook (current) and v4 (historical)
+notebooks/      research notebook, v5 Colab driver (current) and v4 (historical)
 manuscript/     claims.yaml, abstract template, nomenclature;
                 private/ (not committed) holds drafts
 figures/        figure captions
